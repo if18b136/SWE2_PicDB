@@ -1,12 +1,11 @@
 package ViewModels;
 
 import Database.DBConnection;
-import PresentationModels.PictureModel;
+import Models.Picture;
+import PresentationModels.Picture_PM;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
 import com.drew.metadata.exif.*;
 
 import javafx.beans.value.ObservableValue;
@@ -14,7 +13,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import org.apache.logging.log4j.LogManager;
@@ -27,9 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Date;
 
 public class MainController extends AbstractController {
     final Logger IOLogger = LogManager.getLogger("Input Output");
@@ -98,15 +94,13 @@ public class MainController extends AbstractController {
             DBConnection jdbc = DBConnection.getInstance();
             jdbc.uploadPic(picName,/*date,*/expTime,maker,model);
 
-            // now we need to create a instance of the pictureModel class and use it's data to display the picture
-            PictureModel newPic = new PictureModel();
-            newPic.setName(picName);
-            newPic.setID();
+            //TODO to create a instance of the pictureModel/picturePresentationModel and use it's data to display the picture
+            // currently doing it all from local info
+
             FileInputStream fis = new FileInputStream(namePath);
             Image pic = new Image(fis);
             picView.setImage(pic);
             setPicBindings();
-            // TODO Changing AnchorPane to Pane fixed resizing problem - currently onlu resizes with width but can be changed by uncommenting the second code line in setBinding
             addPreview(pic);    // changed to external function so init preview can call it too.
 
         } catch(IOException | ImageProcessingException | SQLException ioe) {
@@ -121,18 +115,10 @@ public class MainController extends AbstractController {
         preview.setImage(pic);
         setPreviewBindings(preview);
         picPreview.getItems().add(preview);
-
-        // TODO currently only shows the latest loaded image
-//        picPreview.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-//            System.out.println("Tile pressed ");
-//            picView.setImage(pic);
-//            setPicBindings();
-//            event.consume();
-//        });
     }
 
     // File needs String, so I changed Path input to String input
-    @FXML
+
     public void initPreview(String picFolderPath) throws FileNotFoundException {
         File folder = new File(picFolderPath);
         String[] pictures = folder.list();
@@ -152,10 +138,5 @@ public class MainController extends AbstractController {
             //there is absolutely no documentation about this anywhere.
             setPicBindings(); // don't forget to call the resizing again
         });
-    }
-
-    @FXML
-    public void viewPic(MouseEvent event) {
-
     }
 }

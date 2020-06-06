@@ -1,4 +1,4 @@
 package PresentationModels;
 
-public class EXIFModel {
+public class Photographer_PM {
 }

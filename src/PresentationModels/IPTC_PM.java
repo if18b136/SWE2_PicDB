@@ -1,4 +1,4 @@
 package PresentationModels;
 
-public class IPTCModel {
+public class IPTC_PM {
 }
