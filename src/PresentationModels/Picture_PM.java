@@ -40,4 +40,11 @@ public class Picture_PM {
     public List<EXIF> getExifList() {
         return exifList.get();
     }
+
+    public void setToCurrent(Picture model) {
+        id.set(model.getID());
+        name.set((model.getName()));
+        iptc.set(model.getIPTC());
+        exifList.set(model.getExifList());
+    }
 }

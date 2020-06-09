@@ -2,7 +2,9 @@ package ViewModels;
 
 import Database.DBConnection;
 import Models.Picture;
+import PresentationModels.PictureList_PM;
 import PresentationModels.Picture_PM;
+import Service.BusinessLayer;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
@@ -25,11 +27,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 
 public class MainController extends AbstractController {
     final Logger IOLogger = LogManager.getLogger("Input Output");
     FileChooser fc = new FileChooser();
+    Picture_PM picturePM = new Picture_PM(new Picture());
+    PictureList_PM pictureListPM = new PictureList_PM();
 
     @FXML
     ImageView picView;
@@ -37,6 +40,15 @@ public class MainController extends AbstractController {
     Pane picViewPane;
     @FXML
     ListView<ImageView> picPreview;
+
+    // init the objects from business layer
+    public MainController() throws Exception {
+        BusinessLayer bl = BusinessLayer.getInstance();
+
+        // gets initialized before already
+        //bl.initPicNameList();
+        //bl.createPicList();
+    }
 
     public void setPicBindings() {
         picView.setPreserveRatio(true);
@@ -55,7 +67,7 @@ public class MainController extends AbstractController {
         File selectedFile = fc.showOpenDialog(this.getStage());
         Path src = Paths.get(selectedFile.getAbsolutePath());
         //TODO paths into config file
-        String namePath = "D:\\#FH_Technikum\\BIF4D1\\SWE2\\PicDB\\Pictures\\" + selectedFile.getName();
+        String namePath = "D:\\FH_Technikum\\BIF4D1\\SWE2\\PicDB\\Pictures\\" + selectedFile.getName();
         String picName = selectedFile.getName();
         Path dest = Paths.get(namePath);
         try{
@@ -90,12 +102,9 @@ public class MainController extends AbstractController {
             System.out.println(maker);
             System.out.println(model);
 
-            // 22.05.20 added DB entry to insert picture data
-            DBConnection jdbc = DBConnection.getInstance();
-            jdbc.uploadPic(picName,/*date,*/expTime,maker,model);
-
-            //TODO to create a instance of the pictureModel/picturePresentationModel and use it's data to display the picture
-            // currently doing it all from local info
+            // set picture presentation model to added picture
+            BusinessLayer bl = BusinessLayer.getInstance();
+            picturePM = bl.addNewPicture(picName,/*date,*/expTime,maker,model);
 
             FileInputStream fis = new FileInputStream(namePath);
             Image pic = new Image(fis);
@@ -103,7 +112,8 @@ public class MainController extends AbstractController {
             setPicBindings();
             addPreview(pic);    // changed to external function so init preview can call it too.
 
-        } catch(IOException | ImageProcessingException | SQLException ioe) {
+            //changed to overall exception catch because of custom DAL exception throw
+        } catch(Exception/* | SQLException */ioe) { //TODO - change Exception to custom created DALException
             IOLogger.error(ioe);
         }
     }
@@ -118,13 +128,10 @@ public class MainController extends AbstractController {
     }
 
     // File needs String, so I changed Path input to String input
-
     public void initPreview(String picFolderPath) throws FileNotFoundException {
-        File folder = new File(picFolderPath);
-        String[] pictures = folder.list();
-        if(pictures != null) {
-            for(String pic : pictures) {
-                FileInputStream fis = new FileInputStream((picFolderPath + pic));
+        if(!pictureListPM.getPictureList().isEmpty()) {
+            for (Picture_PM picPM : pictureListPM.getPictureList()) {
+                FileInputStream fis = new FileInputStream((picFolderPath + picPM.getName()));
                 Image img = new Image(fis);
                 addPreview(img);
             }
@@ -133,10 +140,12 @@ public class MainController extends AbstractController {
         }
         picPreview.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends ImageView> ov,ImageView old_pic, ImageView new_pic) -> {
             picView.setImage(picPreview.getSelectionModel().getSelectedItem().getImage());
-            // so for some reason, it is a legal assignment to just do picView = selected imageview from listview.
-            // BUT the assignment just gets ignored - so instead you have to set the picView image to the selected items image, as you can see in the code line above.
-            //there is absolutely no documentation about this anywhere.
             setPicBindings(); // don't forget to call the resizing again
+
+            // Set picture presentation model to current picture
+            // change index and name in list presentation model
+
+
         });
     }
 }

@@ -20,7 +20,6 @@ public class DBConnection {
     //private int picMetaID = 1;    now gets auto incremented
 
     //Static Singleton initialisation
-
     private DBConnection() throws SQLException{
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -62,7 +61,7 @@ public class DBConnection {
             picNameID = result.getInt(1);
         }
         result.close();
-        return picNameID;   //TODO handle picture not found
+        return picNameID;   //TODO handle picture not found - will be handled in DAL
     }
 
     public void uploadPic(String name/*, Date date*/, String expTime, String maker, String model) throws SQLException {
@@ -129,7 +128,7 @@ public class DBConnection {
     }
 
     public HashMap<Integer,String> getAllPictureNames() throws SQLException {
-        PreparedStatement getNames = con.prepareStatement("select ID, NAME from picdb.metadata");
+        PreparedStatement getNames = con.prepareStatement("select ID, NAME from picdb.picture");
         ResultSet result = getNames.executeQuery();
         HashMap<Integer,String> pictureList = new HashMap<>();
         while(result.next()) {

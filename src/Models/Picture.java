@@ -1,12 +1,13 @@
 package Models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Picture{
     private int ID;
     private String name;
     private IPTC iptc;
-    private List<EXIF> exifList;
+    private List<EXIF> exifList = new ArrayList<>();
 
     public int getID() {
         return ID;
