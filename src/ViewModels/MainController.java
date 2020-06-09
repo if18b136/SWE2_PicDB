@@ -63,59 +63,20 @@ public class MainController extends AbstractController {
     }
 
     @FXML
-    public void addPic() throws IOException {
+    public void addPic() throws Exception {
         File selectedFile = fc.showOpenDialog(this.getStage());
         Path src = Paths.get(selectedFile.getAbsolutePath());
         //TODO paths into config file
         String namePath = "D:\\FH_Technikum\\BIF4D1\\SWE2\\PicDB\\Pictures\\" + selectedFile.getName();
-        String picName = selectedFile.getName();
-        Path dest = Paths.get(namePath);
-        try{
-            Files.copy(src,dest);
-            Metadata metadata = ImageMetadataReader.readMetadata(selectedFile);
-            // print out all metadata
-//            for (Directory directory : metadata.getDirectories()) {
-//                for (Tag tag : directory.getTags()) {
-//                    System.out.println(tag);
-//                }
-//            }
 
-            // obtain the Exif directory
-            ExifSubIFDDirectory subIFDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-            ExifIFD0Directory IFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-            ExifImageDirectory ImageDirectory = metadata.getFirstDirectoryOfType(ExifImageDirectory.class);
+        BusinessLayer bl = BusinessLayer.getInstance();
+        picturePM = bl.extractMetadata(selectedFile, src, namePath);
 
-            // create a descriptor
-            ExifSubIFDDescriptor subIFDDescriptor = new ExifSubIFDDescriptor(subIFDDirectory);
-            ExifIFD0Descriptor IFD0Descriptor = new ExifIFD0Descriptor(IFD0Directory);
-            ExifImageDescriptor ImageDescriptor = new ExifImageDescriptor(ImageDirectory);
-
-            // Date only works if there is a date within the EXIF data, otherwise we will get a NullPointerException
-            // TODO convert date from JAVA.util to JAVA.sql
-            //Date date = subIFDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
-            String expTime = subIFDDescriptor.getExposureTimeDescription();
-            String maker = IFD0Descriptor.getDescription(271);
-            String model = IFD0Descriptor.getDescription(272);
-
-            //System.out.println(date);
-            System.out.println(expTime);
-            System.out.println(maker);
-            System.out.println(model);
-
-            // set picture presentation model to added picture
-            BusinessLayer bl = BusinessLayer.getInstance();
-            picturePM = bl.addNewPicture(picName,/*date,*/expTime,maker,model);
-
-            FileInputStream fis = new FileInputStream(namePath);
-            Image pic = new Image(fis);
-            picView.setImage(pic);
-            setPicBindings();
-            addPreview(pic);    // changed to external function so init preview can call it too.
-
-            //changed to overall exception catch because of custom DAL exception throw
-        } catch(Exception/* | SQLException */ioe) { //TODO - change Exception to custom created DALException
-            IOLogger.error(ioe);
-        }
+        FileInputStream fis = new FileInputStream(namePath);
+        Image pic = new Image(fis);
+        picView.setImage(pic);
+        setPicBindings();
+        addPreview(pic);
     }
 
     // TODO pic in preview are bigger than list height
@@ -141,11 +102,9 @@ public class MainController extends AbstractController {
         picPreview.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends ImageView> ov,ImageView old_pic, ImageView new_pic) -> {
             picView.setImage(picPreview.getSelectionModel().getSelectedItem().getImage());
             setPicBindings(); // don't forget to call the resizing again
-
-            // Set picture presentation model to current picture
-            // change index and name in list presentation model
-
-
+            // Set picture presentation model to current picture, change index and name in list presentation model
+            pictureListPM.setCurrentPic(picPreview.getItems().indexOf(picPreview.getSelectionModel().getSelectedItem()));
+            picturePM = pictureListPM.getCurPicView();
         });
     }
 }

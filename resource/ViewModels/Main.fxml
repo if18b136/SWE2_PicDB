@@ -92,6 +92,6 @@
                 </Tab>
             </TabPane>
         </SplitPane>
-        <ListView fx:id="picPreview" editable="true" orientation="HORIZONTAL" prefHeight="200.0" prefWidth="200.0" />
+        <ListView fx:id="picPreview" editable="true" orientation="HORIZONTAL" prefHeight="200.0" prefWidth="200.0" /> <!-- onMouseClicked="#selectPic" -->
     </SplitPane>
 </VBox>

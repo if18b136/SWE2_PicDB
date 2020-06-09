@@ -22,10 +22,14 @@ public class PictureList_PM {
         currentPicIndex.set(-1);
     }
 
-    public Picture_PM getCurViewPicture() {
+    public Picture_PM getCurPicView() {
         return pictureList.get(currentPicIndex.get());
     }
-    public void setCurrentPic() { }
+    public void setCurrentPic(int index) {
+        this.currentPicIndex.set(index);
+        this.currentPicName.set(pictureList.get(index).getName());
+        System.out.println("User clicked on " + pictureList.get(index).getName());
+    }
 
     public List<Picture_PM> getPictureList() { return this.pictureList; }
 
