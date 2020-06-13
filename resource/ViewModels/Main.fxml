@@ -6,6 +6,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.collections.FXCollections?>
 <VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ViewModels.MainController"> <!-- fx:controller="ViewModels.MainController"-->
     <HBox>
         <MenuBar HBox.hgrow="ALWAYS">
@@ -70,21 +71,19 @@
                 </Tab>
                 <Tab text="EXIF">
                     <VBox prefHeight="200.0" prefWidth="100.0">
-                        <ChoiceBox prefWidth="150.0" value="Erstens">
+                        <ChoiceBox fx:id="exifChoiceBox" prefWidth="150.0" value="1">
                             <!--<FXCollections fx:factory="observableArrayList">-->
-                            <String fx:value="Erstens" />
-                            <String fx:value="Zweitens" />
-                            <String fx:value="Drittens" />
-                            <VBox.margin>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                            </VBox.margin>
+                                <String fx:value="1" />
                             <!--</FXCollections>-->
+                            <VBox.margin>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                </VBox.margin>
                         </ChoiceBox>
-                        <TextField prefHeight="25.0">
+                        <TextField fx:id="exifValue" prefHeight="25.0">
                             <VBox.margin>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </VBox.margin></TextField>
-                        <TextArea prefHeight="112.0">
+                        <TextArea fx:id="exifDescription" prefHeight="112.0">
                             <VBox.margin>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </VBox.margin></TextArea>

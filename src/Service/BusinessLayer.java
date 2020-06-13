@@ -60,8 +60,10 @@ public class BusinessLayer {
         DataAccessLayer dal = DataAccessLayer.getInstance();
         // give DAL the db data, return a picture presentation model containing the data
         Picture newPic = dal.addNewPicture(name,/*date,*/expTime,maker,model);
-        picPmList.add(new Picture_PM(newPic));
-        return new Picture_PM(newPic);
+        // picture PM also needs metadata models from picture
+        Picture_PM newPicPM = new Picture_PM(newPic);
+        picPmList.add(newPicPM);
+        return newPicPM;
     }
 
     public Picture_PM extractMetadata(File selectedFile, Path src, String namePath) throws Exception{

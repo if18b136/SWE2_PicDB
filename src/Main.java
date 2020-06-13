@@ -15,15 +15,17 @@ import org.apache.logging.log4j.Logger;
 
 public class Main extends Application{
 
-    final Logger dbConnectionLogger = LogManager.getLogger("DB Connection");
+    //final Logger dbConnectionLogger = LogManager.getLogger("DB Connection");
     final Logger IOLogger = LogManager.getLogger("Input Output");
 
     @Override
     public void start(Stage primaryStage){
 
         try{
-            DBConnection jdbc = DBConnection.getInstance();
-            Connection con = jdbc.getConnection();
+            System.out.println("TEXTAREA");
+
+            //DBConnection jdbc = DBConnection.getInstance();
+            //Connection con = jdbc.getConnection();
             System.out.println("Test1");
             // TODO get the preview initialisation done properly instead of setting it up like this
             // needed for resize binding
@@ -43,8 +45,8 @@ public class Main extends Application{
             primaryStage.setScene(new Scene(root, 600,400));
             primaryStage.setTitle("PicBD");
             primaryStage.show();
-        } catch(IOException | SQLException e) {
-            dbConnectionLogger.info(e); // default catches only from error
+        } catch(IOException ioe) {
+            IOLogger.info(ioe); // default catches only from error
         }
     }
 

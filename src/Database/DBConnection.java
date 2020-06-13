@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DBConnection {
+    //TODO change complete EXIF access into fixed data instead of variable strings
     private static DBConnection jdbc;
     private Connection con;
     private String url = "jdbc:mysql://127.0.0.1:3306/picdb";

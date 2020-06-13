@@ -3,12 +3,13 @@ package Models;
 import java.util.List;
 public class IPTC {
     // 3 IDs because of the database format
-    private int copyrightID;
-    private int photographerID;
-    private int tagListID;
-    private String photographer;
-    private String copyright;
-    private String tagList; //TODO change to List and implement proper listing in gui
+    //TODO Constructor for default value initialisation?
+    private int copyrightID = -1;
+    private int photographerID = -1;
+    private int tagListID = -1;
+    private String photographer = "";
+    private String copyright = "";
+    private String tagList = ""; //TODO change to List and implement proper listing in gui
 
     public int getCopyrightID() { return copyrightID; }
     public void setCopyrightID(int ID) { this.copyrightID = ID; }

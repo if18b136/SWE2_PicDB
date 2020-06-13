@@ -2,6 +2,7 @@ package ViewModels;
 
 import Database.DBConnection;
 import Models.Picture;
+import PresentationModels.EXIF_PM;
 import PresentationModels.PictureList_PM;
 import PresentationModels.Picture_PM;
 import Service.BusinessLayer;
@@ -11,8 +12,13 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.*;
 
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -27,9 +33,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class MainController extends AbstractController {
-    final Logger IOLogger = LogManager.getLogger("Input Output");
+    final Logger mcLogger = LogManager.getLogger("Main Controller");
     FileChooser fc = new FileChooser();
     Picture_PM picturePM = new Picture_PM(new Picture());
     PictureList_PM pictureListPM = new PictureList_PM();
@@ -40,12 +47,17 @@ public class MainController extends AbstractController {
     Pane picViewPane;
     @FXML
     ListView<ImageView> picPreview;
+    @FXML
+    ChoiceBox<String> exifChoiceBox;
+    @FXML
+    TextField exifValue;
+    @FXML
+    TextArea exifDescription;
 
     // init the objects from business layer
     public MainController() throws Exception {
-        BusinessLayer bl = BusinessLayer.getInstance();
-
         // gets initialized before already
+        //BusinessLayer bl = BusinessLayer.getInstance();
         //bl.initPicNameList();
         //bl.createPicList();
     }
@@ -97,7 +109,7 @@ public class MainController extends AbstractController {
                 addPreview(img);
             }
         } else {
-            IOLogger.info("Picture directory empty at the time of preview initialization.");
+            mcLogger.info("Picture directory empty at the time of preview initialization.");
         }
         picPreview.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends ImageView> ov,ImageView old_pic, ImageView new_pic) -> {
             picView.setImage(picPreview.getSelectionModel().getSelectedItem().getImage());
@@ -105,6 +117,29 @@ public class MainController extends AbstractController {
             // Set picture presentation model to current picture, change index and name in list presentation model
             pictureListPM.setCurrentPic(picPreview.getItems().indexOf(picPreview.getSelectionModel().getSelectedItem()));
             picturePM = pictureListPM.getCurPicView();
+            //System.out.println(picPreview.getSelectionModel().getSelectedIndex());    // current index of selected item in listView
+            //System.out.println(picturePM.getName());  //to check if picturePM is getting refreshed correctly
+
+            refreshExifChoiceBox(picturePM.getExifList());  //TODO add value and description
+        });
+    }
+
+    @FXML
+    public void refreshExifChoiceBox(List<EXIF_PM> exif_pmList) {
+        ObservableList<String> exifsStrings = FXCollections.observableArrayList();
+        for(EXIF_PM exifPm : exif_pmList) {
+            exifsStrings.add(exifPm.getName());
+        }
+        exifChoiceBox.setItems(exifsStrings);
+        // The default value needs to be set - I did not find a smarter way than simply using the eventHandle for the initial value - but it works fine!
+        //TODO clean up double use of text refresh
+        exifChoiceBox.setValue(exifsStrings.get(0));
+        exifValue.setText(picturePM.getExifByIndex(0).getName());
+        exifDescription.setText(picturePM.getExifByIndex(0).getDescription());
+
+        exifChoiceBox.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> os,String old_str, String new_str) -> {
+            exifValue.setText(picturePM.getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getName());
+            exifDescription.setText(picturePM.getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getDescription());
         });
     }
 }

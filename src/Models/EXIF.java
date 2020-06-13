@@ -1,11 +1,10 @@
 package Models;
 
 public class EXIF {
-    private int ID;
     // TODO get various data types in, currently only using Strings for EXIF
-    private String name;
-    private String description;
-    private int pictureID;  // needed?
+    private int ID = -1;
+    private String name = "";
+    private String description = "";
 
     public int getID() { return ID; }
     public void setID(int id) { this.ID = id; }
