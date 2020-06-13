@@ -2,6 +2,7 @@ package Service;
 
 import Database.DBConnection;
 import Database.DataAccessLayer;
+import Models.IPTC;
 import Models.Picture;
 import PresentationModels.Picture_PM;
 import com.drew.imaging.ImageMetadataReader;
@@ -28,26 +29,37 @@ public class BusinessLayer {
     private HashMap<Integer,String> picList = new HashMap<>(); // currently loading pictures and then creating the models afterwards seems simpler than already creating an PM list in the DatabaseAccess-layer
     private List<Picture_PM> picPmList = new ArrayList<>();
     private static BusinessLayer bl = new BusinessLayer();
+    private final String path = "D:\\FH_Technikum\\BIF4D1\\SWE2\\PicDB\\Pictures\\"; // TODO get path from config
 
     private BusinessLayer() {
-
+        //get path from config
     }
+
+    public String getPath() { return path; }
 
     public static BusinessLayer getInstance() {
         return bl;
     }
 
-    public void initPicNameList() throws Exception {
-        DataAccessLayer dal = DataAccessLayer.getInstance();
-        picList = dal.getAllPictureNames(); // return list of finished Picture_PMs would be the most direct way
+    public void initPicNameList() {
+        try{
+            DataAccessLayer dal = DataAccessLayer.getInstance();
+            picList = dal.getAllPictureNames(); // return list of finished Picture_PMs would be the most direct way
+        } catch (Exception e) {
+            BLLogger.error(e.getMessage());
+        }
     }
 
     // complete list of currently existing pictures - turned into PresentationModels
-    public void createPicList() throws Exception {
-        DataAccessLayer dal = DataAccessLayer.getInstance();
-        for(Map.Entry<Integer,String> pic : picList.entrySet()) {
-            Picture_PM picture_pm = dal.createPictureModel(pic.getKey(),pic.getValue());
-            picPmList.add(picture_pm);
+    public void createPicList() {
+        try{
+            DataAccessLayer dal = DataAccessLayer.getInstance();
+            for(Map.Entry<Integer,String> pic : picList.entrySet()) {
+                Picture_PM picture_pm = dal.createPictureModel(pic.getKey(),pic.getValue());
+                picPmList.add(picture_pm);
+            }
+        } catch (Exception e) {
+            BLLogger.error(e.getMessage());
         }
     }
 
@@ -95,8 +107,7 @@ public class BusinessLayer {
             System.out.println(model);
 
             // set picture presentation model to added picture
-            Picture_PM picture_pm = bl.addNewPicture(picName,/*date,*/expTime,maker,model);
-            return picture_pm;
+            return bl.addNewPicture(picName,/*date,*/expTime,maker,model);
         } catch(IOException ioe) { //TODO - change Exception to custom created DALException
             BLLogger.error(ioe.getMessage());
         }
@@ -104,5 +115,29 @@ public class BusinessLayer {
         return null;
     }
 
-    //TODO add load picture into view-function from mainController here
+    public void changeIptcData(Picture_PM picPM) {
+        try{
+            //TODO rules for invalid updates
+            //look  for existing iptc database entries
+            DataAccessLayer dal = DataAccessLayer.getInstance();
+            if(picPM.getIptc().getPhotographerID() == -1) {
+                dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getPhotographer());
+                //TODO what about linking the photographer?
+            } else {
+                dal.updateIptc(picPM.getIptc().getPhotographerID(),picPM.getIptc().getPhotographer());
+            }
+            if(picPM.getIptc().getCopyrightID() == -1) {
+                dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getCopyright());
+            } else {
+                dal.updateIptc(picPM.getIptc().getCopyrightID(),picPM.getIptc().getCopyright());
+            }
+            if(picPM.getIptc().getTagListID() == -1) {
+                dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getTagList());
+            } else {
+                dal.updateIptc(picPM.getIptc().getTagListID(),picPM.getIptc().getTagList());
+            }
+        } catch (Exception e) {
+            BLLogger.error(e.getMessage());
+        }
+    }
 }

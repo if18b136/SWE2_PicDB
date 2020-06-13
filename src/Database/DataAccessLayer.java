@@ -3,11 +3,15 @@ package Database;
 import Models.Picture;
 import PresentationModels.PictureList_PM;
 import PresentationModels.Picture_PM;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.sql.SQLException;
 import java.util.HashMap;
 
 public class DataAccessLayer {
+    final Logger DALLogger = LogManager.getLogger("Data Access Layer");
     private static DataAccessLayer dal = new DataAccessLayer();
 
     private DataAccessLayer() {}
@@ -55,6 +59,26 @@ public class DataAccessLayer {
             return new Picture_PM(con.createPicModel(id, name));
         } catch(SQLException sql) {
             throw new Exception("DALException at DAL.createPictureModel: " + sql.getMessage());
+        }
+    }
+
+    public void addIptc(int picID, String type, String value) throws Exception{
+        try{
+            DBConnection con = DBConnection.getInstance();
+            con.addIptc(picID,type,value);
+        } catch(SQLException sql) {
+            DALLogger.error(sql.getMessage());
+            throw new Exception("DALException at DAL.addIptc: " + sql.getMessage());
+        }
+    }
+
+    public void updateIptc(int iptcID, String value) throws Exception {
+        try{
+            DBConnection con = DBConnection.getInstance();
+            con.updateIptc(iptcID,value);
+        } catch(SQLException sql) {
+            DALLogger.error(sql.getMessage());
+            throw new Exception("DALException at DAL.updateIptc: " + sql.getMessage());
         }
     }
 }

@@ -13,7 +13,6 @@ public class EXIF_PM {
     private StringProperty description = new SimpleStringProperty();
 
     public EXIF_PM(EXIF model) {
-        System.out.println("Test EXIF PM constructor");
         if(model == null){ model = new EXIF();}
         id.set(model.getID());
         name.set((model.getName()));

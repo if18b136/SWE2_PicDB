@@ -15,14 +15,16 @@ import java.util.List;
 public class Picture_PM {
     private IntegerProperty id = new SimpleIntegerProperty();
     private StringProperty name = new SimpleStringProperty();
-    private ObjectProperty<IPTC_PM> iptc = new SimpleObjectProperty<>();
+//    private ObjectProperty<IPTC_PM> iptc = new SimpleObjectProperty<>();
+    private IPTC_PM iptc = new IPTC_PM(new IPTC());
     private ObjectProperty<List<EXIF_PM>> exifList = new SimpleObjectProperty<>();
+    private Picture model;
 
     public Picture_PM(Picture model) {
-        System.out.println("Test Picture PM constructor");
+        this.model = model;
         id.set(model.getID());
         name.set((model.getName()));
-        iptc.set(new IPTC_PM(model.getIPTC()));
+//        iptc.set(new IPTC_PM(model.getIPTC()));
         exifList.set(mToPm(model.getExifList()));
     }
 
@@ -35,19 +37,12 @@ public class Picture_PM {
     }
 
     public IPTC_PM getIptc() {
-        return iptc.get();
+        return iptc;
         //return iptc == null ? new IPTC() : iptc.get();
     }
 
     public List<EXIF_PM> getExifList() {
         return exifList.get();
-    }
-
-    public void setToCurrent(Picture model) {
-        id.set(model.getID());
-        name.set((model.getName()));
-        iptc.set(new IPTC_PM(model.getIPTC()));
-        exifList.set(mToPm(model.getExifList()));
     }
 
     // due to me not wanting to make a fixed variation of exifs, I need to convert the exif list into a Presentation model list
@@ -64,5 +59,14 @@ public class Picture_PM {
         return index == -1 ? exifList.get().get(0) : exifList.get().get(index);   // first get to receive exif list, second one to receive certain pm with index.
     }
 
+    public void updateIptc() {
+        iptc.save(model.getIPTC());
+        refresh(model);
+    }
+
+    public void refresh(Picture model) {
+        this.model = model;
+        iptc.refreshIptc(model.getIPTC());
+    }
 
 }

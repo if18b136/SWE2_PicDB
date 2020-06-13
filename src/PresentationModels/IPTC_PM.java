@@ -12,15 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 
 public class IPTC_PM {
-    private IntegerProperty copyrightID = new SimpleIntegerProperty();
     private IntegerProperty photographerID = new SimpleIntegerProperty();
+    private IntegerProperty copyrightID = new SimpleIntegerProperty();
     private IntegerProperty tagListID = new SimpleIntegerProperty();
     private StringProperty photographer = new SimpleStringProperty();
     private StringProperty copyright = new SimpleStringProperty();
     private StringProperty tagList = new SimpleStringProperty();
 
     public IPTC_PM (IPTC model) {
-        System.out.println("Test IPTC PM constructor");
         if(model == null){ model = new IPTC();}
         copyrightID.set(model.getCopyrightID());
         photographerID.set(model.getPhotographerID());
@@ -30,6 +29,30 @@ public class IPTC_PM {
         tagList.set(model.getTagList());
     }
 
+    public void refreshIptc(IPTC model) {
+        photographer.set(model.getPhotographer());
+        copyright.set(model.getCopyright());
+        tagList.set(model.getTagList());
+    }
+
+    public StringProperty photographerProperty() {
+        return photographer;
+    }
+    public StringProperty copyrightProperty() {
+        return copyright;
+    }
+    public StringProperty tagListProperty() {
+        return tagList;
+    }
+
+    public int getPhotographerID() { return photographerID.get(); }
+    public int getCopyrightID() { return copyrightID.get(); }
+    public int getTagListID() { return tagListID.get(); }
+
+    public String getPhotographer() { return photographer.get(); }
+    public String getCopyright() { return copyright.get(); }
+    public String getTagList() { return tagList.get(); }
+
     public HashMap<String,String> getValues() {
         HashMap<String,String> iptcList = new HashMap<>();
         iptcList.put("Photographer",photographer.get());
@@ -37,4 +60,9 @@ public class IPTC_PM {
         iptcList.put("Tags",tagList.get());
         return iptcList;
     }
+
+    public void save(IPTC iptc) {
+        iptc.setCopyright(copyright.get());
+    }
+
 }

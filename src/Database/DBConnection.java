@@ -3,6 +3,8 @@ import Models.EXIF;
 import Models.IPTC;
 import Models.Picture;
 import PresentationModels.Picture_PM;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DBConnection {
+    final Logger DBConLogger = LogManager.getLogger("Database Connection");
     //TODO change complete EXIF access into fixed data instead of variable strings
     private static DBConnection jdbc;
     private Connection con;
@@ -181,5 +184,23 @@ public class DBConnection {
         pic.setIPTC(iptc);
 
         return pic;
+    }
+
+    public void addIptc(int picID, String type, String value) throws SQLException {
+        PreparedStatement addIptc = con.prepareStatement("insert into picdb.metadata(TYPE,NAME,DESCRIPTION,FK_MD_PICTURE_ID) values(?,?,?,?)");
+        addIptc.setString(1,"IPTC");
+        addIptc.setString(2, type);
+        addIptc.setString(3, value);
+        addIptc.setInt(4,picID);
+        addIptc.execute();
+        DBConLogger.info("IPTC entry created.");
+    }
+
+    public void updateIptc(int iptcID, String value) throws SQLException {
+        PreparedStatement addIptc = con.prepareStatement("update picdb.metadata set DESCRIPTION=? where ID=?");
+        addIptc.setString(1,value);
+        addIptc.setInt(2,iptcID);
+        addIptc.execute();
+        DBConLogger.info("IPTC entry updated.");
     }
 }

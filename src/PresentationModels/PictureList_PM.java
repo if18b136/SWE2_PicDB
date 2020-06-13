@@ -14,7 +14,7 @@ public class PictureList_PM {
     private IntegerProperty currentPicIndex = new SimpleIntegerProperty();
     private StringProperty currentPicName = new SimpleStringProperty();
 
-    public PictureList_PM() throws Exception {
+    public PictureList_PM(){
         BusinessLayer bl = BusinessLayer.getInstance();
         bl.initPicNameList();
         bl.createPicList();
@@ -34,7 +34,7 @@ public class PictureList_PM {
     public List<Picture_PM> getPictureList() { return this.pictureList; }
 
     // TODO - evaluate if refresh is needed anywhere
-    public void refreshPictureList() throws Exception {
+    public void refreshPictureList(){
         BusinessLayer bl = BusinessLayer.getInstance();
         bl.initPicNameList();
         bl.createPicList();

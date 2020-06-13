@@ -6,6 +6,7 @@ import PresentationModels.EXIF_PM;
 import PresentationModels.IPTC_PM;
 import PresentationModels.PictureList_PM;
 import PresentationModels.Picture_PM;
+import Service.Binding;
 import Service.BusinessLayer;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -16,12 +17,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import org.apache.logging.log4j.LogManager;
@@ -31,11 +30,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class MainController extends AbstractController {
     final Logger mcLogger = LogManager.getLogger("Main Controller");
@@ -52,19 +53,34 @@ public class MainController extends AbstractController {
     @FXML
     ChoiceBox<String> exifChoiceBox,iptcChoiceBox;
     @FXML
-    TextField exifValue;
+    TextField exifValue,iptcPhotographer,copyright;
     @FXML
-    TextField iptcValue;
+    TextArea exifDescription,iptcTags;
     @FXML
-    TextArea exifDescription,iptcDescription;
+    Button save;
+    @FXML
+    Pane iptcPane;
 
 
     // init the objects from business layer
     public MainController() throws Exception {
         // gets initialized before already
-        //BusinessLayer bl = BusinessLayer.getInstance();
-        //bl.initPicNameList();
-        //bl.createPicList();
+        BusinessLayer bl = BusinessLayer.getInstance();
+        System.out.println("1");
+        bl.initPicNameList();
+        System.out.println("2");
+        bl.createPicList();
+        System.out.println("3");
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resources) {
+        super.initialize(url, resources);
+
+        setPicBindings();
+        initPreview();
+
+        Binding.applyBinding(iptcPane, picturePM.getIptc());
     }
 
     public void setPicBindings() {
@@ -107,28 +123,34 @@ public class MainController extends AbstractController {
     }
 
     // File needs String, so I changed Path input to String input
-    public void initPreview(String picFolderPath) throws FileNotFoundException {
-        if(!pictureListPM.getPictureList().isEmpty()) {
-            for (Picture_PM picPM : pictureListPM.getPictureList()) {
-                FileInputStream fis = new FileInputStream((picFolderPath + picPM.getName()));
-                Image img = new Image(fis);
-                addPreview(img);
+    //TODO init list in business layer, so MC does not need path
+    public void initPreview() {
+        try{
+            //pictureListPM.refreshPictureList(); //TODO is this even needed when I already init the list with new PicListPM()?
+            BusinessLayer bl = BusinessLayer.getInstance();
+            if(!pictureListPM.getPictureList().isEmpty()) {
+                for (Picture_PM picPM : pictureListPM.getPictureList()) {
+                    FileInputStream fis = new FileInputStream((bl.getPath() + picPM.getName()));
+                    Image img = new Image(fis);
+                    addPreview(img);
+                }
+            } else {
+                mcLogger.info("Picture directory empty at the time of preview initialization.");
             }
-        } else {
-            mcLogger.info("Picture directory empty at the time of preview initialization.");
+            picPreview.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends ImageView> ov,ImageView old_pic, ImageView new_pic) -> {
+                picView.setImage(picPreview.getSelectionModel().getSelectedItem().getImage());
+                    setPicBindings(); // don't forget to call the resizing again
+                    // Set picture presentation model to current picture, change index and name in list presentation model
+                    pictureListPM.setCurrentPic(picPreview.getItems().indexOf(picPreview.getSelectionModel().getSelectedItem()));
+                    picturePM = pictureListPM.getCurPicView();
+                    //System.out.println(picPreview.getSelectionModel().getSelectedIndex());    // current index of selected item in listView
+                    //System.out.println(picturePM.getName());  //to check if picturePM is getting refreshed correctly
+                    refreshExifChoiceBox(picturePM.getExifList());  //TODO add value and description
+                    //refreshIptcChoiceBox(picturePM.getIptc());
+            });
+        } catch (FileNotFoundException fnf) {
+            mcLogger.error(fnf);
         }
-        picPreview.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends ImageView> ov,ImageView old_pic, ImageView new_pic) -> {
-            picView.setImage(picPreview.getSelectionModel().getSelectedItem().getImage());
-            setPicBindings(); // don't forget to call the resizing again
-            // Set picture presentation model to current picture, change index and name in list presentation model
-            pictureListPM.setCurrentPic(picPreview.getItems().indexOf(picPreview.getSelectionModel().getSelectedItem()));
-            picturePM = pictureListPM.getCurPicView();
-            //System.out.println(picPreview.getSelectionModel().getSelectedIndex());    // current index of selected item in listView
-            //System.out.println(picturePM.getName());  //to check if picturePM is getting refreshed correctly
-
-            refreshExifChoiceBox(picturePM.getExifList());  //TODO add value and description
-            refreshIptcChoiceBox(picturePM.getIptc());
-        });
     }
 
     @FXML
@@ -153,9 +175,17 @@ public class MainController extends AbstractController {
     @FXML
     public void refreshIptcChoiceBox(IPTC_PM iptcPm) {
         HashMap<String,String> iptcList = iptcPm.getValues();
-        iptcValue.setText(iptcList.get(iptcChoiceBox.getSelectionModel().getSelectedItem()));
-        iptcChoiceBox.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> os,String old_str, String new_str) -> {
-            iptcValue.setText(iptcList.get(iptcChoiceBox.getSelectionModel().getSelectedItem()));
-        });
+        iptcPhotographer.setText(iptcList.get("Photographer"));
+        //iptcCopyright.setText(iptcList.get("Copyright"));
+        iptcTags.setText(iptcList.get("Tags"));
     }
+
+    @FXML
+    public void saveIptcChanges() {
+        // changes also need to be saved in picturePreviewList or loaded into the database so it can be grabbed again
+        System.out.println("yay");
+        picturePM.updateIptc();
+        System.out.println(picturePM.getIptc().getCopyright());
+    }
+
 }
