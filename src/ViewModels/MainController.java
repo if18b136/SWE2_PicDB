@@ -3,6 +3,7 @@ package ViewModels;
 import Database.DBConnection;
 import Models.Picture;
 import PresentationModels.EXIF_PM;
+import PresentationModels.IPTC_PM;
 import PresentationModels.PictureList_PM;
 import PresentationModels.Picture_PM;
 import Service.BusinessLayer;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainController extends AbstractController {
@@ -48,11 +50,14 @@ public class MainController extends AbstractController {
     @FXML
     ListView<ImageView> picPreview;
     @FXML
-    ChoiceBox<String> exifChoiceBox;
+    ChoiceBox<String> exifChoiceBox,iptcChoiceBox;
     @FXML
     TextField exifValue;
     @FXML
-    TextArea exifDescription;
+    TextField iptcValue;
+    @FXML
+    TextArea exifDescription,iptcDescription;
+
 
     // init the objects from business layer
     public MainController() throws Exception {
@@ -72,6 +77,7 @@ public class MainController extends AbstractController {
         preview.setPreserveRatio(true);
         preview.fitHeightProperty().bind(picPreview.heightProperty());
         preview.fitWidthProperty().bind(picPreview.widthProperty());
+        //preview.setFitWidth(100); // solves scroll problem but makes list not well-resizeable
     }
 
     @FXML
@@ -121,6 +127,7 @@ public class MainController extends AbstractController {
             //System.out.println(picturePM.getName());  //to check if picturePM is getting refreshed correctly
 
             refreshExifChoiceBox(picturePM.getExifList());  //TODO add value and description
+            refreshIptcChoiceBox(picturePM.getIptc());
         });
     }
 
@@ -140,6 +147,15 @@ public class MainController extends AbstractController {
         exifChoiceBox.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> os,String old_str, String new_str) -> {
             exifValue.setText(picturePM.getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getName());
             exifDescription.setText(picturePM.getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getDescription());
+        });
+    }
+
+    @FXML
+    public void refreshIptcChoiceBox(IPTC_PM iptcPm) {
+        HashMap<String,String> iptcList = iptcPm.getValues();
+        iptcValue.setText(iptcList.get(iptcChoiceBox.getSelectionModel().getSelectedItem()));
+        iptcChoiceBox.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> os,String old_str, String new_str) -> {
+            iptcValue.setText(iptcList.get(iptcChoiceBox.getSelectionModel().getSelectedItem()));
         });
     }
 }

@@ -63,4 +63,6 @@ public class Picture_PM {
         //I did not find a good way to set the default value for the exif choice box, so I had to catch the -1 first value and return the initial exif for it.
         return index == -1 ? exifList.get().get(0) : exifList.get().get(index);   // first get to receive exif list, second one to receive certain pm with index.
     }
+
+
 }

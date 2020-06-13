@@ -42,7 +42,7 @@ public class Main extends Application{
             //Parent root = FXMLLoader.load(getClass().getResource("ViewModels/Main.fxml"));
             VBox root = fl.getRoot();
             System.out.println("Test3");
-            primaryStage.setScene(new Scene(root, 600,400));
+            primaryStage.setScene(new Scene(root, 1024,768));
             primaryStage.setTitle("PicBD");
             primaryStage.show();
         } catch(IOException ioe) {
