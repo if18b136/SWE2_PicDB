@@ -51,6 +51,7 @@ public class BusinessLayer {
     }
 
     // complete list of currently existing pictures - turned into PresentationModels
+    //TODO IPTC data does not get read
     public void createPicList() {
         try{
             DataAccessLayer dal = DataAccessLayer.getInstance();
@@ -136,7 +137,6 @@ public class BusinessLayer {
             //look  for existing iptc database entries
             DataAccessLayer dal = DataAccessLayer.getInstance();
             if(picPM.getIptc().getPhotographerID() == -1) {
-                //TODO link the photographer - check if String is valid and THEN create a new entry or link to existing one
                 if(validPhotographer(picPM.getID(),picPM.getIptc().getPhotographer())) {
                     dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getPhotographer());
                 }
@@ -144,12 +144,12 @@ public class BusinessLayer {
                 dal.updateIptc(picPM.getIptc().getPhotographerID(),picPM.getIptc().getPhotographer());
             }
             if(picPM.getIptc().getCopyrightID() == -1) {
-                dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getCopyright());
+                dal.addIptc(picPM.getID(),"Copyright",picPM.getIptc().getCopyright());
             } else {
                 dal.updateIptc(picPM.getIptc().getCopyrightID(),picPM.getIptc().getCopyright());
             }
             if(picPM.getIptc().getTagListID() == -1) {
-                dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getTagList());
+                dal.addIptc(picPM.getID(),"Tags",picPM.getIptc().getTagList());
             } else {
                 dal.updateIptc(picPM.getIptc().getTagListID(),picPM.getIptc().getTagList());
             }
@@ -160,26 +160,37 @@ public class BusinessLayer {
 
     // validates the photographer String - returns true AND creates new DB link to picture if valid, else returns false
     public boolean validPhotographer( int picID, String photographer) {
-        //TODO RegEx check
-        String[] split = photographer.split(" ");   // split string up
-        if(split[0].length() <= 100) {   // entry needs to be <= 100 to be valid for name AND surname
-            if(split.length == 1 && split[0].length() <= 50) {     // only one name inserted - last name needs to be set so input will be interpreted as last name
-                DataAccessLayer dal = DataAccessLayer.getInstance();
-                dal.assignPhotographer(picID,photographer);
-                return true;
-            } else if(split.length == 2) {  // we have both name and surname
-                if (split[1].length() <= 50 ) {
+        try {
+            //TODO RegEx check
+            String[] split = photographer.split(" ");   // split string up
+            if(split[0].length() <= 100) {   // entry needs to be <= 100 to be valid for name AND surname
+                if(split.length == 1 && split[0].length() <= 50) {     // only one name inserted - last name needs to be set so input will be interpreted as last name
                     DataAccessLayer dal = DataAccessLayer.getInstance();
-                    dal.assignPhotographer(picID,split[0],split[1]);
+                    dal.assignPhotographer(picID,photographer);
+                    BLLogger.info("valid Person - last name");
+                    System.out.println("valid Person - last name");
                     return true;
-                }
-            } else if(split.length == 3) {     // middle name also there
-                if((split[0].length() + split[1].length()) <= 100 && split[2].length() <= 50) {
-                    DataAccessLayer dal = DataAccessLayer.getInstance();
-                    dal.assignPhotographer(picID,(split[0] + " " + split[1]),split[2]);  //TODO improve string concatenation
-                    return true;
+                } else if(split.length == 2) {  // we have both name and surname
+                    if (split[1].length() <= 50 ) {
+                        DataAccessLayer dal = DataAccessLayer.getInstance();
+                        dal.assignPhotographer(picID,split[0],split[1]);
+                        BLLogger.info("valid Person - full name");
+                        System.out.println("valid Person - full name");
+                        return true;
+                    }
+                } else if(split.length == 3) {     // middle name also there
+                    if((split[0].length() + split[1].length()) <= 100 && split[2].length() <= 50) {
+                        DataAccessLayer dal = DataAccessLayer.getInstance();
+                        dal.assignPhotographer(picID,(split[0] + " " + split[1]),split[2]);  //TODO improve string concatenation
+                        BLLogger.info("valid Person - full + middle name");
+                        System.out.println("valid Person - full + middle name");
+                        return true;
+                    }
                 }
             }
+            return false;
+        } catch (Exception e) {
+            BLLogger.error(e.getMessage());
         }
         return false;
     }

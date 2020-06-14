@@ -15,8 +15,8 @@ import java.util.List;
 public class Picture_PM {
     private IntegerProperty id = new SimpleIntegerProperty();
     private StringProperty name = new SimpleStringProperty();
-//    private ObjectProperty<IPTC_PM> iptc = new SimpleObjectProperty<>();
-    private IPTC_PM iptc = new IPTC_PM(new IPTC());
+    private ObjectProperty<IPTC_PM> iptc = new SimpleObjectProperty<>();
+//    private IPTC_PM iptc = new IPTC_PM(new IPTC());
     private ObjectProperty<List<EXIF_PM>> exifList = new SimpleObjectProperty<>();
     private Picture model;
 
@@ -24,7 +24,7 @@ public class Picture_PM {
         this.model = model;
         id.set(model.getID());
         name.set((model.getName()));
-//        iptc.set(new IPTC_PM(model.getIPTC()));
+        iptc.set(new IPTC_PM(model.getIPTC()));
         exifList.set(mToPm(model.getExifList()));
     }
 
@@ -37,8 +37,8 @@ public class Picture_PM {
     }
 
     public IPTC_PM getIptc() {
-        return iptc;
-        //return iptc == null ? new IPTC() : iptc.get();
+//        return iptc;
+        return iptc == null ? new IPTC_PM(new IPTC()) : iptc.get();
     }
 
     public List<EXIF_PM> getExifList() {
@@ -60,14 +60,14 @@ public class Picture_PM {
     }
 
     //currently not in use - could be used instead of manual evaluation of all 3 values in Business Layer
-    public void updateIptc(IPTC_PM iptcPm) {
-        //iptc.saveNewIptc(model.getIptc);
-        refresh(model);
-    }
+//    public void updateIptc(IPTC_PM iptcPm) {
+//        //iptc.saveNewIptc(model.getIptc);
+//        refresh(model);
+//    }
 
-    public void refresh(Picture model) {
-        this.model = model;
-        iptc.refreshIptc(model.getIPTC());
-    }
+//    public void refresh(Picture model) {
+//        this.model = model;
+//        iptc.refreshIptc(model.getIPTC());
+//    }
 
 }

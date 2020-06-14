@@ -164,16 +164,18 @@ public class DBConnection {
         IPTC iptc = new IPTC();
         while (result.next()) {
             String input = result.getString(2);
+            System.out.println("load IPTC " + input);
             switch(input) {
-                case "copyright":
+                case "Copyright":
                     iptc.setCopyrightID(result.getInt(1));
                     iptc.setCopyright(result.getString(3));
+                    System.out.println("Copyright set to: " + iptc.getCopyright());
                     break;
-                case "photographer":
+                case "Photographer":
                     iptc.setPhotographerID(result.getInt(1));
                     iptc.setPhotographer(result.getString(3));
                     break;
-                case "taglist":
+                case "Tags":
                     iptc.setTagListID(result.getInt(1));
                     iptc.setTagList(result.getString(3));
                     break;
@@ -182,7 +184,7 @@ public class DBConnection {
             }
         }
         pic.setIPTC(iptc);
-
+        System.out.println("Copyright in Picture Model: " + pic.getIPTC().getCopyright());
         return pic;
     }
 
@@ -202,5 +204,61 @@ public class DBConnection {
         addIptc.setInt(2,iptcID);
         addIptc.execute();
         DBConLogger.info("IPTC entry updated.");
+    }
+
+    //TODO person needs uniqueness or else simply checking for lastname is not enough to get a single output eventually
+    public int checkPhotographer(String lastName) throws SQLException {
+        PreparedStatement getPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
+        getPhotographer.setString(1,lastName);
+        ResultSet result = getPhotographer.executeQuery();
+        return result.next() ? result.getInt(1) : 0 ;
+    }
+
+    public int checkPhotographer(String firstName, String lastName) throws SQLException {
+        PreparedStatement getPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=? and VORNAME=?");
+        getPhotographer.setString(1,lastName);
+        getPhotographer.setString(2,firstName);
+        ResultSet result = getPhotographer.executeQuery();
+        return result.next() ? result.getInt(1) : 0 ;
+    }
+
+    // this currently gives the newest entry - not suitable for anything else than getting the just created personID.
+    public int newPhotographer(String lastName) throws SQLException {
+        PreparedStatement addPerson = con.prepareStatement("insert into picdb.person(NACHNAME) values(?)");
+        addPerson.setString(1,lastName);
+        addPerson.execute();
+        addPerson = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
+        addPerson.setString(1,lastName);
+        ResultSet result = addPerson.executeQuery();
+        int id = 0;
+        while (result.next()) {
+            id = result.getInt(1);
+        }
+        return id;
+    }
+
+    // this currently gives the newest entry - not suitable for anything else than getting the just created personID.
+    public int newPhotographer(String firstName, String lastName) throws SQLException {
+        PreparedStatement addPerson = con.prepareStatement("insert into picdb.person(VORNAME,NACHNAME) values(?,?)");
+        addPerson.setString(1,firstName);
+        addPerson.setString(2,lastName);
+        addPerson.execute();
+        addPerson = con.prepareStatement("select ID from picdb.person where VORNAME=? and NACHNAME=?");
+        addPerson.setString(1,firstName);
+        addPerson.setString(2,lastName);
+        ResultSet result = addPerson.executeQuery();
+        int id = 0;
+        while (result.next()) {
+            id = result.getInt(1);
+        }
+        return id;
+    }
+
+    public void newPicPhotographer(int picID, int personID) throws SQLException {
+        PreparedStatement addPicturePerson = con.prepareStatement("insert into picdb.picture_person(FK_PICTURE_ID,FK_PERSON_ID) values(?,?)");
+        addPicturePerson.setInt(1,picID);
+        addPicturePerson.setInt(2,personID);
+        addPicturePerson.execute();
+        System.out.println("connected IDs: pic " + picID + " - person " + personID);
     }
 }

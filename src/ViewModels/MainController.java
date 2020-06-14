@@ -65,12 +65,9 @@ public class MainController extends AbstractController {
     // init the objects from business layer
     public MainController() throws Exception {
         // gets initialized before already
-        BusinessLayer bl = BusinessLayer.getInstance();
-        System.out.println("1");
-        bl.initPicNameList();
-        System.out.println("2");
-        bl.createPicList();
-        System.out.println("3");
+//        BusinessLayer bl = BusinessLayer.getInstance();
+//        bl.initPicNameList();
+//        bl.createPicList();
     }
 
     @Override
