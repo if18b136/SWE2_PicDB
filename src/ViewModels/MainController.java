@@ -51,11 +51,11 @@ public class MainController extends AbstractController {
     @FXML
     ListView<ImageView> picPreview;
     @FXML
-    ChoiceBox<String> exifChoiceBox,iptcChoiceBox;
+    ChoiceBox<String> exifChoiceBox;
     @FXML
-    TextField exifValue,iptcPhotographer,copyright;
+    TextField exifValue,photographer,copyright;
     @FXML
-    TextArea exifDescription,iptcTags;
+    TextArea exifDescription,tags;
     @FXML
     Button save;
     @FXML
@@ -80,7 +80,7 @@ public class MainController extends AbstractController {
         setPicBindings();
         initPreview();
 
-        Binding.applyBinding(iptcPane, picturePM.getIptc());
+        //Binding.applyBinding(iptcPane, picturePM.getIptc()); // Does not bind
     }
 
     public void setPicBindings() {
@@ -127,8 +127,8 @@ public class MainController extends AbstractController {
     public void initPreview() {
         try{
             //pictureListPM.refreshPictureList(); //TODO is this even needed when I already init the list with new PicListPM()?
-            BusinessLayer bl = BusinessLayer.getInstance();
             if(!pictureListPM.getPictureList().isEmpty()) {
+                BusinessLayer bl = BusinessLayer.getInstance();
                 for (Picture_PM picPM : pictureListPM.getPictureList()) {
                     FileInputStream fis = new FileInputStream((bl.getPath() + picPM.getName()));
                     Image img = new Image(fis);
@@ -146,7 +146,7 @@ public class MainController extends AbstractController {
                     //System.out.println(picPreview.getSelectionModel().getSelectedIndex());    // current index of selected item in listView
                     //System.out.println(picturePM.getName());  //to check if picturePM is getting refreshed correctly
                     refreshExifChoiceBox(picturePM.getExifList());  //TODO add value and description
-                    //refreshIptcChoiceBox(picturePM.getIptc());
+                    refreshIptcChoiceBox(picturePM.getIptc());
             });
         } catch (FileNotFoundException fnf) {
             mcLogger.error(fnf);
@@ -172,20 +172,22 @@ public class MainController extends AbstractController {
         });
     }
 
+
     @FXML
     public void refreshIptcChoiceBox(IPTC_PM iptcPm) {
         HashMap<String,String> iptcList = iptcPm.getValues();
-        iptcPhotographer.setText(iptcList.get("Photographer"));
-        //iptcCopyright.setText(iptcList.get("Copyright"));
-        iptcTags.setText(iptcList.get("Tags"));
+        photographer.setText(iptcList.get("Photographer"));
+        copyright.setText(iptcList.get("Copyright"));
+        tags.setText(iptcList.get("Tags"));
     }
 
     @FXML
     public void saveIptcChanges() {
         // changes also need to be saved in picturePreviewList or loaded into the database so it can be grabbed again
-        System.out.println("yay");
-        picturePM.updateIptc();
-        System.out.println(picturePM.getIptc().getCopyright());
+        BusinessLayer bl = BusinessLayer.getInstance();
+        bl.updateIptc(photographer.getText(),copyright.getText(),tags.getText(),picturePM);
+        //is page refreshing even needed? - yes because the current Picture presentation model still has the old info
+        pictureListPM.refreshPictureList(); //this should be called from Business Layer but does it make sense to call BL so that it then calls the pictureList function?
     }
 
 }

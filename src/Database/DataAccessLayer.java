@@ -81,4 +81,34 @@ public class DataAccessLayer {
             throw new Exception("DALException at DAL.updateIptc: " + sql.getMessage());
         }
     }
+
+    public void assignPhotographer(int picID, String lastName) throws Exception {
+        try{
+            DBConnection con = DBConnection.getInstance();
+            // evaluate if there is already a photographer with the name
+            int photographerID = con.checkPhotographer(lastName);   //returns either the ID or 0 for no entry found
+            if(photographerID == 0) {   // name does not exist, create new photographer
+                photographerID = con.newPhotographer(lastName); // return new ID
+            }
+            con.newPicPhotographer(picID,photographerID);
+        } catch(SQLException sql) {
+            DALLogger.error(sql.getMessage());
+            throw new Exception("DALException at DAL.assignPhotographer: " + sql.getMessage());
+        }
+    }
+
+    public void assignPhotographer(int picID, String firstName, String lastName) throws Exception {
+        try{
+            DBConnection con = DBConnection.getInstance();
+            // evaluate if there is already a photographer with the name
+            int photographerID = con.checkPhotographer(firstName, lastName);   //returns either the ID or 0 for no entry found
+            if(photographerID == 0) {   // name does not exist, create new photographer
+                photographerID = con.newPhotographer(firstName, lastName); // return new ID
+            }
+            con.newPicPhotographer(picID,photographerID);
+        } catch(SQLException sql) {
+            DALLogger.error(sql.getMessage());
+            throw new Exception("DALException at DAL.assignPhotographer: " + sql.getMessage());
+        }
+    }
 }

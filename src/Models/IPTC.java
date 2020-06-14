@@ -11,6 +11,14 @@ public class IPTC {
     private String copyright = "";
     private String tagList = ""; //TODO change to List and implement proper listing in gui
 
+    public IPTC() {}
+
+    public IPTC(String photographer, String copyright, String tagList) {
+        this.photographer = photographer;
+        this.copyright = copyright;
+        this.tagList = tagList;
+    }
+
     public int getCopyrightID() { return copyrightID; }
     public void setCopyrightID(int ID) { this.copyrightID = ID; }
 

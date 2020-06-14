@@ -115,14 +115,31 @@ public class BusinessLayer {
         return null;
     }
 
+    public void updateIptc(String photographer, String copyright, String tagList, Picture_PM curPicPm) {
+        //first evaluate changes and set them
+        if(!photographer.equals(curPicPm.getIptc().getPhotographer())) {
+            curPicPm.getIptc().setPhotographer(photographer);
+        }
+        if(!copyright.equals(curPicPm.getIptc().getCopyright())) {
+            curPicPm.getIptc().setCopyright(copyright);
+        }
+        if(!photographer.equals(curPicPm.getIptc().getTagList())) {
+            curPicPm.getIptc().setTagList(tagList);
+        }
+
+        changeIptcData(curPicPm);
+    }
+
     public void changeIptcData(Picture_PM picPM) {
         try{
             //TODO rules for invalid updates
             //look  for existing iptc database entries
             DataAccessLayer dal = DataAccessLayer.getInstance();
             if(picPM.getIptc().getPhotographerID() == -1) {
-                dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getPhotographer());
-                //TODO what about linking the photographer?
+                //TODO link the photographer - check if String is valid and THEN create a new entry or link to existing one
+                if(validPhotographer(picPM.getID(),picPM.getIptc().getPhotographer())) {
+                    dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getPhotographer());
+                }
             } else {
                 dal.updateIptc(picPM.getIptc().getPhotographerID(),picPM.getIptc().getPhotographer());
             }
@@ -139,5 +156,31 @@ public class BusinessLayer {
         } catch (Exception e) {
             BLLogger.error(e.getMessage());
         }
+    }
+
+    // validates the photographer String - returns true AND creates new DB link to picture if valid, else returns false
+    public boolean validPhotographer( int picID, String photographer) {
+        //TODO RegEx check
+        String[] split = photographer.split(" ");   // split string up
+        if(split[0].length() <= 100) {   // entry needs to be <= 100 to be valid for name AND surname
+            if(split.length == 1 && split[0].length() <= 50) {     // only one name inserted - last name needs to be set so input will be interpreted as last name
+                DataAccessLayer dal = DataAccessLayer.getInstance();
+                dal.assignPhotographer(picID,photographer);
+                return true;
+            } else if(split.length == 2) {  // we have both name and surname
+                if (split[1].length() <= 50 ) {
+                    DataAccessLayer dal = DataAccessLayer.getInstance();
+                    dal.assignPhotographer(picID,split[0],split[1]);
+                    return true;
+                }
+            } else if(split.length == 3) {     // middle name also there
+                if((split[0].length() + split[1].length()) <= 100 && split[2].length() <= 50) {
+                    DataAccessLayer dal = DataAccessLayer.getInstance();
+                    dal.assignPhotographer(picID,(split[0] + " " + split[1]),split[2]);  //TODO improve string concatenation
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -37,8 +37,8 @@ public class Main extends Application{
 //            mainController.initPreview();  // File needs String, so I changed Path input to String input
 
             // need the already filled main controller object instead of a new one
-            Parent root = FXMLLoader.load(getClass().getResource("ViewModels/Main.fxml"));
 //            VBox root = fl.getRoot();
+            Parent root = FXMLLoader.load(getClass().getResource("ViewModels/Main.fxml"));
             System.out.println("Test3");
             primaryStage.setScene(new Scene(root, 1024,768));
             primaryStage.setTitle("PicBD");

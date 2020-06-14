@@ -53,6 +53,10 @@ public class IPTC_PM {
     public String getCopyright() { return copyright.get(); }
     public String getTagList() { return tagList.get(); }
 
+    public void setPhotographer(String photographer) { this.photographer.set(photographer); }
+    public void setCopyright(String copyright) { this.copyright.set(copyright); }
+    public void setTagList(String tagList) { this.tagList.set(tagList); }
+
     public HashMap<String,String> getValues() {
         HashMap<String,String> iptcList = new HashMap<>();
         iptcList.put("Photographer",photographer.get());
@@ -61,8 +65,10 @@ public class IPTC_PM {
         return iptcList;
     }
 
-    public void save(IPTC iptc) {
+    public void saveNewIptc(IPTC iptc) {
         iptc.setCopyright(copyright.get());
+        iptc.setPhotographer(photographer.get());
+        iptc.setTagList(tagList.get());
     }
 
 }

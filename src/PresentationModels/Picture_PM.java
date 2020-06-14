@@ -59,8 +59,9 @@ public class Picture_PM {
         return index == -1 ? exifList.get().get(0) : exifList.get().get(index);   // first get to receive exif list, second one to receive certain pm with index.
     }
 
-    public void updateIptc() {
-        iptc.save(model.getIPTC());
+    //currently not in use - could be used instead of manual evaluation of all 3 values in Business Layer
+    public void updateIptc(IPTC_PM iptcPm) {
+        //iptc.saveNewIptc(model.getIptc);
         refresh(model);
     }
 
