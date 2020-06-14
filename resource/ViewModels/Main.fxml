@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import Service.*?>
+<?import main.Service.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ViewModels.MainController"> <!-- fx:controller="ViewModels.MainController"-->
+<VBox prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.ViewModels.MainController"> <!-- fx:controller="ViewModels.MainController"-->
     <HBox>
         <MenuBar HBox.hgrow="ALWAYS">
             <Menu mnemonicParsing="false" text="File">
