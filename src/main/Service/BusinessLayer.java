@@ -1,5 +1,6 @@
 package main.Service;
 
+import main.Database.DALFactory;
 import main.Database.DBConnection;
 import main.Database.DataAccessLayer;
 import main.Models.IPTC;
@@ -47,7 +48,7 @@ public class BusinessLayer {
 
     public void initPicNameList() {
         try{
-            DataAccessLayer dal = DataAccessLayer.getInstance();
+            DataAccessLayer dal = (DataAccessLayer) DALFactory.getDAL();
             picList = dal.getAllPictureNames(); // return list of finished Picture_PMs would be the most direct way
         } catch (Exception e) {
             BLLogger.error(e.getMessage());
@@ -58,7 +59,7 @@ public class BusinessLayer {
     //TODO IPTC data does not get read
     public void createPicList() {
         try{
-            DataAccessLayer dal = DataAccessLayer.getInstance();
+            DataAccessLayer dal = (DataAccessLayer) DALFactory.getDAL();
             for(Map.Entry<Integer,String> pic : picList.entrySet()) {
                 Picture_PM picture_pm = dal.createPictureModel(pic.getKey(),pic.getValue());
                 picPmList.add(picture_pm);
@@ -74,7 +75,7 @@ public class BusinessLayer {
 
     // call DAL, add new Picture, return presentation model of new picture
     public Picture_PM addNewPicture(String name/*, Date date*/, String expTime, String maker, String model) throws Exception {
-        DataAccessLayer dal = DataAccessLayer.getInstance();
+        DataAccessLayer dal = (DataAccessLayer) DALFactory.getDAL();
         // give DAL the db data, return a picture presentation model containing the data
         Picture newPic = dal.addNewPicture(name,/*date,*/expTime,maker,model);
         // picture PM also needs metadata models from picture
@@ -139,7 +140,7 @@ public class BusinessLayer {
         try{
             //TODO rules for invalid updates
             //look  for existing iptc database entries
-            DataAccessLayer dal = DataAccessLayer.getInstance();
+            DataAccessLayer dal = (DataAccessLayer) DALFactory.getDAL();
             if(picPM.getIptc().getPhotographerID() == -1) {
                 if(validPhotographer(picPM.getID(),picPM.getIptc().getPhotographer())) {
                     dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getPhotographer());
@@ -166,17 +167,16 @@ public class BusinessLayer {
     public boolean validPhotographer( int picID, String photographer) {
         try {
             //TODO RegEx check
+            DataAccessLayer dal = (DataAccessLayer) DALFactory.getDAL();
             String[] split = photographer.split(" ");   // split string up
             if(split[0].length() <= 100) {   // entry needs to be <= 100 to be valid for name AND surname
                 if(split.length == 1 && split[0].length() <= 50) {     // only one name inserted - last name needs to be set so input will be interpreted as last name
-                    DataAccessLayer dal = DataAccessLayer.getInstance();
                     dal.assignPhotographer(picID,photographer);
                     BLLogger.info("valid Person - last name");
                     System.out.println("valid Person - last name");
                     return true;
                 } else if(split.length == 2) {  // we have both name and surname
                     if (split[1].length() <= 50 ) {
-                        DataAccessLayer dal = DataAccessLayer.getInstance();
                         dal.assignPhotographer(picID,split[0],split[1]);
                         BLLogger.info("valid Person - full name");
                         System.out.println("valid Person - full name");
@@ -184,7 +184,6 @@ public class BusinessLayer {
                     }
                 } else if(split.length == 3) {     // middle name also there
                     if((split[0].length() + split[1].length()) <= 100 && split[2].length() <= 50) {
-                        DataAccessLayer dal = DataAccessLayer.getInstance();
                         dal.assignPhotographer(picID,(split[0] + " " + split[1]),split[2]);  //TODO improve string concatenation
                         BLLogger.info("valid Person - full + middle name");
                         System.out.println("valid Person - full + middle name");

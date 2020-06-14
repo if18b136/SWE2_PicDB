@@ -12,6 +12,7 @@
 //TODO 12: Config file - 9 - DONE - from where do I need to load the creds for the db connection
 //TODO 13: Database Factory Mock - 9
 //TODO 14: Time documentation - 2
+//TODO 15: DALFactory as object from business layer class or call in each instance?
 
 
 
