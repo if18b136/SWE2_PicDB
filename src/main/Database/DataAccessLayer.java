@@ -25,15 +25,14 @@ public class DataAccessLayer implements DAL {
 
     @Override
     public void initialize() {
-        //init DBConnection with properties from config
-
+        //init DBConnection with properties from config here?
     }
     public List<Picture> getPictures() { return null; }
     public Picture getPicture(int ID) { return null; }
     public void save(Picture p) {}
     public void delete(Picture p) {}
 
-    //access db, get model from picture name
+    //access db, get model from picture name - was more practical at picture creation than search by id which has to be extracted extra.
     @Override
     public Picture getPicture(String name) throws Exception{
         try{
@@ -48,6 +47,7 @@ public class DataAccessLayer implements DAL {
         }
     }
 
+    @Override
     public Picture addNewPicture(String name/*, Date date*/, String expTime, String maker, String model) throws Exception{
         try{
             DBConnection con = DBConnection.getInstance();
@@ -58,6 +58,7 @@ public class DataAccessLayer implements DAL {
         }
     }
 
+    @Override
     public HashMap<Integer, String> getAllPictureNames() throws Exception {
         try{
             DBConnection con = DBConnection.getInstance();
@@ -67,6 +68,7 @@ public class DataAccessLayer implements DAL {
         }
     }
 
+    @Override
     public Picture_PM createPictureModel(int id, String name) throws Exception{
         try{
             DBConnection con = DBConnection.getInstance();
@@ -76,6 +78,7 @@ public class DataAccessLayer implements DAL {
         }
     }
 
+    @Override
     public void addIptc(int picID, String type, String value) throws Exception{
         try{
             DBConnection con = DBConnection.getInstance();
@@ -86,6 +89,7 @@ public class DataAccessLayer implements DAL {
         }
     }
 
+    @Override
     public void updateIptc(int iptcID, String value) throws Exception {
         try{
             DBConnection con = DBConnection.getInstance();
@@ -96,6 +100,7 @@ public class DataAccessLayer implements DAL {
         }
     }
 
+    @Override
     public void assignPhotographer(int picID, String lastName) throws Exception {
         try{
             DBConnection con = DBConnection.getInstance();
@@ -111,6 +116,7 @@ public class DataAccessLayer implements DAL {
         }
     }
 
+    @Override
     public void assignPhotographer(int picID, String firstName, String lastName) throws Exception {
         try{
             DBConnection con = DBConnection.getInstance();

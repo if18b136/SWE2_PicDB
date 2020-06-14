@@ -84,10 +84,10 @@ public class BusinessLayer {
         return newPicPM;
     }
 
-    public Picture_PM extractMetadata(File selectedFile, Path src, String namePath) throws Exception{
+    public Picture_PM extractMetadata(File selectedFile, Path src) throws Exception{
         try{
-            Path dest = Paths.get(namePath);
             String picName = selectedFile.getName();
+            Path dest = Paths.get(this.path + picName);
             Files.copy(src,dest);
             Metadata metadata = ImageMetadataReader.readMetadata(selectedFile);
 
@@ -173,20 +173,17 @@ public class BusinessLayer {
                 if(split.length == 1 && split[0].length() <= 50) {     // only one name inserted - last name needs to be set so input will be interpreted as last name
                     dal.assignPhotographer(picID,photographer);
                     BLLogger.info("valid Person - last name");
-                    System.out.println("valid Person - last name");
                     return true;
                 } else if(split.length == 2) {  // we have both name and surname
                     if (split[1].length() <= 50 ) {
                         dal.assignPhotographer(picID,split[0],split[1]);
                         BLLogger.info("valid Person - full name");
-                        System.out.println("valid Person - full name");
                         return true;
                     }
                 } else if(split.length == 3) {     // middle name also there
                     if((split[0].length() + split[1].length()) <= 100 && split[2].length() <= 50) {
                         dal.assignPhotographer(picID,(split[0] + " " + split[1]),split[2]);  //TODO improve string concatenation
                         BLLogger.info("valid Person - full + middle name");
-                        System.out.println("valid Person - full + middle name");
                         return true;
                     }
                 }

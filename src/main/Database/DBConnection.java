@@ -11,7 +11,7 @@ import java.sql.*;
 import java.util.HashMap;
 
 public class DBConnection {
-    final Logger DBConLogger = LogManager.getLogger("Database Connection");
+    final static Logger DBConLogger = LogManager.getLogger("Database Connection");
     //TODO change complete EXIF access into fixed data instead of variable strings
     private static DBConnection jdbc;
     private Connection con;
@@ -27,8 +27,7 @@ public class DBConnection {
             this.username = Config.getInstance().getProperties().getProperty("username");
             this.con = DriverManager.getConnection(url, username, password);
         } catch (ClassNotFoundException cnf) {
-            System.out.println("Database Connection Creation Failed : " + cnf.getMessage());
-            cnf.printStackTrace();
+            DBConLogger.error("Database Connection Creation Failed : " + cnf.getMessage());
         }
     }
 
@@ -44,7 +43,7 @@ public class DBConnection {
             synchronized (DBConnection.class){
                 if(jdbc == null){
                     jdbc = new DBConnection();
-                    System.out.println("Database Connection created successfully.");
+                    DBConLogger.info("Database Connection created successfully.");
                 }
             }
         }
@@ -71,7 +70,6 @@ public class DBConnection {
         //insertPic.setInt(1,picNameID);    id now gets auto incremented
         insertPic.setString(1,name);
         insertPic.execute();
-        System.out.println("Successfully inserted pic:" + name);
         PreparedStatement insertMeta = con.prepareStatement("insert into picdb.metadata(TYPE,NAME,DESCRIPTION,FK_MD_PICTURE_ID) values(?,?,?,?)");
         /*insertMeta.setInt(1, picMetaID);
         insertMeta.setString(2,"EXIF");
@@ -81,38 +79,24 @@ public class DBConnection {
         insertMeta.execute();
         picMetaID++;
         insertMeta = con.prepareStatement("insert into picdb.metadata values(?,?,?,?,?)");*/
-
         int picNameID = getPicID(name);
-
-        //insertMeta.setInt(1, picMetaID); ID now gets auto incremented
         insertMeta.setString(1,"EXIF");
         insertMeta.setString(2, "Exposure");
         insertMeta.setString(3, expTime);
         insertMeta.setInt(4,picNameID);
         insertMeta.execute();
-        System.out.println("Added metadata ExpTime for pic" + name);
-        //picMetaID++;  auto increment
         insertMeta = con.prepareStatement("insert into picdb.metadata(TYPE,NAME,DESCRIPTION,FK_MD_PICTURE_ID) values(?,?,?,?)");
-        //insertMeta.setInt(1, picMetaID); ID now gets auto incremented
         insertMeta.setString(1,"EXIF");
         insertMeta.setString(2, "Maker");
         insertMeta.setString(3, maker);
         insertMeta.setInt(4,picNameID);
         insertMeta.execute();
-        System.out.println("Added metadata Maker for pic" + name);
-        //picMetaID++;  auto increment
         insertMeta = con.prepareStatement("insert into picdb.metadata(TYPE,NAME,DESCRIPTION,FK_MD_PICTURE_ID) values(?,?,?,?)");
-        //insertMeta.setInt(1, picMetaID); ID now gets auto incremented
         insertMeta.setString(1,"EXIF");
         insertMeta.setString(2, "Model");
         insertMeta.setString(3, model);
         insertMeta.setInt(4,picNameID);
         insertMeta.execute();
-        System.out.println("Added metadata Model for pic" + name);
-        //picMetaID++;  auto increment
-        //picNameID++;  auto increment
-
-        //con.close();
     }
 
     public HashMap<String, String> getMetaData(int ID, String type) throws SQLException {
@@ -144,7 +128,7 @@ public class DBConnection {
         pic.setID(id);
         pic.setName(name);
 
-        PreparedStatement getEXIF = con.prepareStatement("select ID,NAME,DESCRIPTION from picdb.metadata where FK_MD_PICTURE_ID=(select id from picture where name=?) AND TYPE='EXIF'");
+        PreparedStatement getEXIF = con.prepareStatement("select ID,NAME,DESCRIPTION from picdb.metadata where FK_MD_PICTURE_ID=(select id from picture where name=?) and TYPE='EXIF'");
         getEXIF.setString(1, name);
         ResultSet result = getEXIF.executeQuery();
         while (result.next()) {
@@ -156,18 +140,17 @@ public class DBConnection {
         }
 
         //TODO get photographer name from database entry instead of as a written string - probably needs db changes to metadata table
-        PreparedStatement getIPTC = con.prepareStatement("select ID,NAME,DESCRIPTION from picdb.metadata where FK_MD_PICTURE_ID=(select id from picture where name=?) & TYPE='IPTC'");
+        System.out.println("Picture: " + name);
+        PreparedStatement getIPTC = con.prepareStatement("select ID,NAME,DESCRIPTION from picdb.metadata where FK_MD_PICTURE_ID=(select id from picture where name=?) and TYPE='IPTC'");
         getIPTC.setString(1, name);
         result = getIPTC.executeQuery();
         IPTC iptc = new IPTC();
         while (result.next()) {
             String input = result.getString(2);
-            System.out.println("load IPTC " + input);
             switch(input) {
                 case "Copyright":
                     iptc.setCopyrightID(result.getInt(1));
                     iptc.setCopyright(result.getString(3));
-                    System.out.println("Copyright set to: " + iptc.getCopyright());
                     break;
                 case "Photographer":
                     iptc.setPhotographerID(result.getInt(1));
@@ -182,7 +165,6 @@ public class DBConnection {
             }
         }
         pic.setIPTC(iptc);
-        System.out.println("Copyright in Picture Model: " + pic.getIPTC().getCopyright());
         return pic;
     }
 
@@ -257,6 +239,5 @@ public class DBConnection {
         addPicturePerson.setInt(1,picID);
         addPicturePerson.setInt(2,personID);
         addPicturePerson.execute();
-        System.out.println("connected IDs: pic " + picID + " - person " + personID);
     }
 }
