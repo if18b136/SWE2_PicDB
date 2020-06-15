@@ -1,6 +1,7 @@
 package main.Database;
 import main.Models.EXIF;
 import main.Models.IPTC;
+import main.Models.Photographer;
 import main.Models.Picture;
 import main.PresentationModels.Picture_PM;
 import main.Service.Config;
@@ -8,7 +9,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class DBConnection {
     final static Logger DBConLogger = LogManager.getLogger("Database Connection");
@@ -67,7 +72,6 @@ public class DBConnection {
 
     public void uploadPic(String name/*, Date date*/, String expTime, String maker, String model) throws SQLException {
         PreparedStatement insertPic = con.prepareStatement("insert into picdb.picture(name) values(?)");
-        //insertPic.setInt(1,picNameID);    id now gets auto incremented
         insertPic.setString(1,name);
         insertPic.execute();
         PreparedStatement insertMeta = con.prepareStatement("insert into picdb.metadata(TYPE,NAME,DESCRIPTION,FK_MD_PICTURE_ID) values(?,?,?,?)");
@@ -77,7 +81,6 @@ public class DBConnection {
         insertMeta.setDate(4, (java.sql.Date) date);
         insertMeta.setInt(5,picNameID);
         insertMeta.execute();
-        picMetaID++;
         insertMeta = con.prepareStatement("insert into picdb.metadata values(?,?,?,?,?)");*/
         int picNameID = getPicID(name);
         insertMeta.setString(1,"EXIF");
@@ -123,6 +126,107 @@ public class DBConnection {
         return pictureList;
     }
 
+    public List<Photographer> retrievePhotographers() throws SQLException {
+        PreparedStatement retrievePhotographers = con.prepareStatement("select ID, VORNAME, NACHNAME, GEBURTSTAG, NOTIZEN from picdb.person");
+        ResultSet result =retrievePhotographers.executeQuery();
+        List<Photographer> photographerList = new ArrayList<>();
+        while (result.next()) {
+            Photographer photographer = new Photographer();
+            photographer.setID(result.getInt(1));
+            photographer.setFirstName(result.getString(2));
+            photographer.setLastName(result.getString(3));
+            if (result.getDate(4) == null) {
+                photographer.setBirthDay(LocalDate.of(1, 1, 1));
+            } else {
+                photographer.setBirthDay(result.getDate(4).toLocalDate());
+            }
+            photographer.setNotes(result.getString(5));
+            photographerList.add(photographer);
+        }
+        return photographerList;
+    }
+
+    public void addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws SQLException {
+        PreparedStatement addNewPhotographer = con.prepareStatement("insert into picdb.person(VORNAME,NACHNAME,GEBURTSTAG,NOTIZEN) values(?,?,?,?)");
+        addNewPhotographer.setString(1,firstName);
+        addNewPhotographer.setString(2,lastName);
+        addNewPhotographer.setDate(3, Date.valueOf(birthday));
+        addNewPhotographer.setString(4,notes);
+        addNewPhotographer.execute();
+    }
+
+    public void editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) throws SQLException {
+        PreparedStatement editPhotographer = con.prepareStatement("update picdb.person set VORNAME=?,NACHNAME=?,GEBURTSTAG=?,NOTIZEN=? where ID=? ");
+        editPhotographer.setString(1,firstName);
+        editPhotographer.setString(2,lastName);
+        editPhotographer.setDate(3, Date.valueOf(birthday));
+        editPhotographer.setString(4,notes);
+        editPhotographer.setInt(5,ID);
+        editPhotographer.execute();
+    }
+
+    public void deletePhotographer(int ID) throws SQLException {
+        PreparedStatement delete = con.prepareStatement("delete from picdb.person where ID=?");
+        delete.setInt(1,ID);
+        delete.execute();
+    }
+
+    // this currently gives the newest entry - not suitable for anything else than getting the just created personID.
+    public int addNewPhotographer(String lastName) throws SQLException {
+        PreparedStatement addPerson = con.prepareStatement("insert into picdb.person(NACHNAME) values(?)");
+        addPerson.setString(1,lastName);
+        addPerson.execute();
+        addPerson = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
+        addPerson.setString(1,lastName);
+        ResultSet result = addPerson.executeQuery();
+        int id = 0;
+        while (result.next()) {
+            id = result.getInt(1);
+        }
+        return id;
+    }
+
+    // this currently gives the newest entry - not suitable for anything else than getting the just created personID.
+    public int addNewPhotographer(String firstName, String lastName) throws SQLException {
+        PreparedStatement addPerson = con.prepareStatement("insert into picdb.person(VORNAME,NACHNAME) values(?,?)");
+        addPerson.setString(1,firstName);
+        addPerson.setString(2,lastName);
+        addPerson.execute();
+        addPerson = con.prepareStatement("select ID from picdb.person where VORNAME=? and NACHNAME=?");
+        addPerson.setString(1,firstName);
+        addPerson.setString(2,lastName);
+        ResultSet result = addPerson.executeQuery();
+        int id = 0;
+        while (result.next()) {
+            id = result.getInt(1);
+        }
+        return id;
+    }
+
+    public void newPicPhotographer(int picID, int personID) throws SQLException {
+        PreparedStatement addPicturePerson = con.prepareStatement("insert into picdb.picture_person(FK_PICTURE_ID,FK_PERSON_ID) values(?,?)");
+        addPicturePerson.setInt(1,picID);
+        addPicturePerson.setInt(2,personID);
+        addPicturePerson.execute();
+    }
+
+    //TODO person needs uniqueness or else simply checking for lastname is not enough to get a single output eventually
+    public int checkPhotographer(String lastName) throws SQLException {
+        PreparedStatement getPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
+        getPhotographer.setString(1,lastName);
+        ResultSet result = getPhotographer.executeQuery();
+        return result.next() ? result.getInt(1) : 0 ;
+    }
+
+    public int checkPhotographer(String firstName, String lastName) throws SQLException {
+        PreparedStatement getPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=? and VORNAME=?");
+        getPhotographer.setString(1,lastName);
+        getPhotographer.setString(2,firstName);
+        ResultSet result = getPhotographer.executeQuery();
+        return result.next() ? result.getInt(1) : 0 ;
+    }
+
+    //TODO extract EXIF and IPTC retrieve to own functions
     public Picture createPicModel(Integer id, String name) throws SQLException {
         Picture pic = new Picture();
         pic.setID(id);
@@ -138,7 +242,6 @@ public class DBConnection {
             exif.setDescription(result.getString(3));
             pic.addEXIF(exif);
         }
-
         //TODO get photographer name from database entry instead of as a written string - probably needs db changes to metadata table
         System.out.println("Picture: " + name);
         PreparedStatement getIPTC = con.prepareStatement("select ID,NAME,DESCRIPTION from picdb.metadata where FK_MD_PICTURE_ID=(select id from picture where name=?) and TYPE='IPTC'");
@@ -186,58 +289,4 @@ public class DBConnection {
         DBConLogger.info("IPTC entry updated.");
     }
 
-    //TODO person needs uniqueness or else simply checking for lastname is not enough to get a single output eventually
-    public int checkPhotographer(String lastName) throws SQLException {
-        PreparedStatement getPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
-        getPhotographer.setString(1,lastName);
-        ResultSet result = getPhotographer.executeQuery();
-        return result.next() ? result.getInt(1) : 0 ;
-    }
-
-    public int checkPhotographer(String firstName, String lastName) throws SQLException {
-        PreparedStatement getPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=? and VORNAME=?");
-        getPhotographer.setString(1,lastName);
-        getPhotographer.setString(2,firstName);
-        ResultSet result = getPhotographer.executeQuery();
-        return result.next() ? result.getInt(1) : 0 ;
-    }
-
-    // this currently gives the newest entry - not suitable for anything else than getting the just created personID.
-    public int newPhotographer(String lastName) throws SQLException {
-        PreparedStatement addPerson = con.prepareStatement("insert into picdb.person(NACHNAME) values(?)");
-        addPerson.setString(1,lastName);
-        addPerson.execute();
-        addPerson = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
-        addPerson.setString(1,lastName);
-        ResultSet result = addPerson.executeQuery();
-        int id = 0;
-        while (result.next()) {
-            id = result.getInt(1);
-        }
-        return id;
-    }
-
-    // this currently gives the newest entry - not suitable for anything else than getting the just created personID.
-    public int newPhotographer(String firstName, String lastName) throws SQLException {
-        PreparedStatement addPerson = con.prepareStatement("insert into picdb.person(VORNAME,NACHNAME) values(?,?)");
-        addPerson.setString(1,firstName);
-        addPerson.setString(2,lastName);
-        addPerson.execute();
-        addPerson = con.prepareStatement("select ID from picdb.person where VORNAME=? and NACHNAME=?");
-        addPerson.setString(1,firstName);
-        addPerson.setString(2,lastName);
-        ResultSet result = addPerson.executeQuery();
-        int id = 0;
-        while (result.next()) {
-            id = result.getInt(1);
-        }
-        return id;
-    }
-
-    public void newPicPhotographer(int picID, int personID) throws SQLException {
-        PreparedStatement addPicturePerson = con.prepareStatement("insert into picdb.picture_person(FK_PICTURE_ID,FK_PERSON_ID) values(?,?)");
-        addPicturePerson.setInt(1,picID);
-        addPicturePerson.setInt(2,personID);
-        addPicturePerson.execute();
-    }
 }

@@ -2,8 +2,10 @@ package main.Database;
 
 import main.Models.EXIF;
 import main.Models.Picture;
+import main.PresentationModels.Photographer_PM;
 import main.PresentationModels.Picture_PM;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,26 @@ public class DALMock implements DAL{
         pic.setName(name);
         pic.setID(1);   // set to 1 so it is not -1
         return pic;
+    }
+
+    @Override
+    public List<Photographer_PM> retrievePhotographers() throws Exception {
+        return null;
+    }
+
+    @Override
+    public void addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws Exception {
+
+    }
+
+    @Override
+    public void editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) throws Exception {
+
+    }
+
+    @Override
+    public void deletePhotographer(int ID) throws Exception {
+
     }
 
     @Override

@@ -18,14 +18,13 @@ public class Main extends Application{
 
     @Override
     public void start(Stage primaryStage){
-
         try{
             Parent root = FXMLLoader.load(getClass().getResource("../ViewModels/Main.fxml"));
             primaryStage.setScene(new Scene(root, 1024,768));
             primaryStage.setTitle("PicBD");
             primaryStage.show();
         } catch(IOException ioe) {
-            IOLogger.info(ioe); // default catches only from error
+            IOLogger.info(ioe.getMessage());
         }
     }
 

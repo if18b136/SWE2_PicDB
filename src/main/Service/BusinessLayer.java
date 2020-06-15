@@ -1,10 +1,13 @@
 package main.Service;
 
+import main.Database.DAL;
 import main.Database.DALFactory;
 import main.Database.DBConnection;
 import main.Database.DataAccessLayer;
 import main.Models.IPTC;
 import main.Models.Picture;
+import main.PresentationModels.PhotographerList_PM;
+import main.PresentationModels.Photographer_PM;
 import main.PresentationModels.Picture_PM;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
@@ -17,10 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 
 public class BusinessLayer {
     final Logger BLLogger = LogManager.getLogger("Business Layer");
@@ -35,6 +36,7 @@ public class BusinessLayer {
             Config config = Config.getInstance();
             this.path = config.getProperties().getProperty("path");
             System.out.println(config.getProperties().getProperty("path"));
+            Locale.setDefault(Locale.GERMANY);  //datepicker in american format because of my local language
         } catch (Exception e) {
             BLLogger.error(e.getMessage());
         }
@@ -51,6 +53,67 @@ public class BusinessLayer {
             DataAccessLayer dal = (DataAccessLayer) DALFactory.getDAL();
             picList = dal.getAllPictureNames(); // return list of finished Picture_PMs would be the most direct way
         } catch (Exception e) {
+            BLLogger.error(e.getMessage());
+        }
+    }
+
+    public List<Photographer_PM> createPhotographerList() {
+        try{
+            DAL dal =  DALFactory.getDAL();
+            return dal.retrievePhotographers();
+        } catch (Exception e) {
+            BLLogger.error(e.getMessage());
+        }
+        BLLogger.info("Something went wrong with PhotographerList creation.");
+        return null;
+    }
+
+    public boolean validatePhotographer(String firstName, String lastName, LocalDate birthday, String notes) {
+        if(firstName != null && lastName != null && birthday != null && notes != null) {    // first validation layer
+            if(firstName.length() <= 100 && lastName.length() > 0 && lastName.length() <= 50 && birthday.compareTo(LocalDate.now()) < 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) {
+        try{
+           if(validatePhotographer(firstName,lastName,birthday,notes)) {
+                DAL dal = DALFactory.getDAL();
+                dal.addNewPhotographer(firstName,lastName,birthday,notes);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            BLLogger.error(e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) {
+        try{
+            if(validatePhotographer(firstName,lastName,birthday,notes)) {
+                DAL dal = DALFactory.getDAL();
+                dal.editPhotographer(ID,firstName,lastName,birthday,notes);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            BLLogger.error(e.getMessage());
+        }
+        return false;
+    }
+
+    public void deletePhotographer(int ID) {
+        try {
+            DAL dal = DALFactory.getDAL();
+            dal.deletePhotographer(ID);
+        }catch (Exception e) {
             BLLogger.error(e.getMessage());
         }
     }

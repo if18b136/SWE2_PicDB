@@ -13,7 +13,8 @@
 //TODO 13: Database Factory Mock - 9
 //TODO 14: Time documentation - 2
 //TODO 15: DALFactory as object from business layer class or call in each instance?
-
+//TODO 16: Frage - wieso genuegt es nicht, einmal @FXML zu setzen fuer die folgenden zeilen, so wie bei @Overwrite?
+//TODO 17: Save Buttons need to be deactivated when nothing is selected
 
 
 

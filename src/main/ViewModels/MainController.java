@@ -1,5 +1,10 @@
 package main.ViewModels;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import main.Database.DBConnection;
 import main.Models.Picture;
 import main.PresentationModels.EXIF_PM;
@@ -24,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -101,6 +107,22 @@ public class MainController extends AbstractController {
         picPreview.getSelectionModel().selectLast();    //automatically select the newly added picture in the preview to let it look like an instant selection from preview
     }
 
+    @FXML
+    public void showPhotographers() {
+        Stage photographerStage = new Stage();
+        try{
+            Parent root = FXMLLoader.load(getClass().getResource("../../ViewModels/Photographers.fxml"));
+            photographerStage.setScene(new Scene(root, 800,600));
+            photographerStage.setTitle("Photographers");
+            photographerStage.initModality(Modality.APPLICATION_MODAL);
+            photographerStage.showAndWait();
+            //TODO Refresh picture info - could now contain old photograher data
+
+        } catch(IOException ioe) {
+            mcLogger.info(ioe.getMessage());
+        }
+    }
+
     // TODO pic in preview are bigger than list height
     @FXML
     public void addPreview(Image pic) {
@@ -111,7 +133,6 @@ public class MainController extends AbstractController {
     }
 
     // File needs String, so I changed Path input to String input
-    //TODO init list in business layer, so MC does not need path
     public void initPreview() {
         try{
             if(!pictureListPM.getPictureList().isEmpty()) {
@@ -133,6 +154,7 @@ public class MainController extends AbstractController {
                 picturePM = pictureListPM.getCurPicView();
                 refreshExifChoiceBox(picturePM.getExifList());
                 refreshIptcChoiceBox(picturePM.getIptc());
+                save.setDisable(false);
             });
         } catch (FileNotFoundException fnf) {
             mcLogger.error(fnf);
