@@ -174,7 +174,7 @@ public class MainController extends AbstractController {
             exifDescription.setText(main.getCurrPicturePm().getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getDescription());
         });
     }
-    
+
     @FXML
     public void refreshIptcChoiceBox(IPTC_PM iptcPm) {
         HashMap<String,String> iptcList = iptcPm.getValues();
