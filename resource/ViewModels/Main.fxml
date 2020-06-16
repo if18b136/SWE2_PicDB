@@ -17,8 +17,9 @@
             <Menu mnemonicParsing="false" text="View">
                 <MenuItem fx:id="showPhotographers" mnemonicParsing="false" onAction="#showPhotographers" text="view Photographers" />
             </Menu>
-            <Menu mnemonicParsing="false" text="Options">
-                <MenuItem mnemonicParsing="false" text="Delete" />
+            <Menu mnemonicParsing="false" text="Reporting">
+                <MenuItem fx:id="generatePicReport" mnemonicParsing="false" text="Generate Picture Report" disable="true"/>
+                <MenuItem fx:id="generateTagReport" mnemonicParsing="false" text="Generate Tag Report" disable="true"/>
             </Menu>
         </MenuBar>
         <MenuBar>
@@ -48,10 +49,18 @@
                                     <Insets left="10.0" top="15.0" />
                                 </VBox.margin>
                             </Text>
-                            <TextField fx:id="photographer" prefHeight="25.0">
-                                <VBox.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                </VBox.margin></TextField>
+                            <HBox prefHeight="25.0" AnchorPane.rightAnchor="0.0" AnchorPane.leftAnchor="0.0">
+                                <TextField fx:id="firstName" prefHeight="25.0" HBox.hgrow="ALWAYS">
+                                    <HBox.margin>
+                                        <Insets bottom="10.0" left="10.0" right="5.0" top="10.0" />
+                                    </HBox.margin>
+                                </TextField>
+                                <TextField fx:id="lastName" prefHeight="25.0" HBox.hgrow="ALWAYS">
+                                    <HBox.margin>
+                                        <Insets bottom="10.0" left="5.0" right="10.0" top="10.0" />
+                                    </HBox.margin>
+                                </TextField>
+                            </HBox>
                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Copyright">
                                 <font>
                                     <Font size="18.0" />

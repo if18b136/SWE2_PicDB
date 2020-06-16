@@ -3,6 +3,7 @@ package main.PresentationModels;
 import javafx.beans.property.*;
 import main.Models.Photographer;
 
+import java.io.FileReader;
 import java.time.LocalDate;
 
 // validation happens in the business layer

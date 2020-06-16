@@ -8,6 +8,7 @@ public class Picture{
     private String name;
     private IPTC iptc;
     private List<EXIF> exifList = new ArrayList<>();
+    private Photographer photographer;
 
     public int getID() {
         return ID;
@@ -25,4 +26,7 @@ public class Picture{
     public List<EXIF> getExifList() { return exifList; }
     public void setExifList(List<EXIF> exifList) { this.exifList = exifList; }
     public void addEXIF(EXIF exif) { this.exifList.add(exif); }
+
+    public Photographer getPhotographer() { return photographer; }
+    public void setPhotographer(Photographer photographer) { this.photographer = photographer; }
 }

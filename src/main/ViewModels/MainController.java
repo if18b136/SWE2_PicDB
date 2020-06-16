@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import main.Database.DBConnection;
+import main.Models.Photographer;
 import main.Models.Picture;
 import main.PresentationModels.*;
 import main.Service.Binding;
@@ -20,6 +21,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import main.Service.PictureReport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,13 +50,15 @@ public class MainController extends AbstractController {
     @FXML
     ChoiceBox<String> exifChoiceBox;
     @FXML
-    TextField exifValue,photographer,copyright;
+    TextField firstName,lastName,exifValue,copyright;
     @FXML
     TextArea exifDescription,tags;
     @FXML
     Button save;
     @FXML
     Pane iptcPane;
+    @FXML
+    MenuItem generatePicReport, generateTagReport;
 
     // init the objects from business layer
     public MainController() throws Exception {
@@ -97,7 +101,7 @@ public class MainController extends AbstractController {
         setPicBindings();
         addPreview(pic);
 
-        refreshIptcChoiceBox(main.getCurrPicturePm().getIptc());
+        refreshIptc(main.getCurrPicturePm().getIptc(),main.getCurrPicturePm().getPhotographer());
         refreshExifChoiceBox(main.getCurrPicturePm().getExifList());
         picPreview.getSelectionModel().selectLast();    //automatically select the newly added picture in the preview to let it look like an instant selection from preview
     }
@@ -111,8 +115,11 @@ public class MainController extends AbstractController {
             photographerStage.setTitle("Photographers");
             photographerStage.initModality(Modality.APPLICATION_MODAL);
             photographerStage.showAndWait();
-            //TODO Refresh picture info - could now contain old photograher data
-
+            //TODO get these 3 lines an own function
+            main.refresh();
+            if(main.getCurrPicturePm().getID() != 0){  //is something clicked? if yes, it could contain the changed photographer name so we have to refresh
+                refreshIptc(main.getCurrPicturePm().getIptc(),main.getCurrPicturePm().getPhotographer());
+            }
         } catch(IOException ioe) {
             mcLogger.info(ioe.getMessage());
         }
@@ -147,9 +154,13 @@ public class MainController extends AbstractController {
                 // Set picture presentation model to current picture, change index and name in list presentation model
                 main.getPictureListPm().setCurrentPic(picPreview.getItems().indexOf(picPreview.getSelectionModel().getSelectedItem()));
                 main.setCurrPicturePm(main.getPictureListPm().getCurPicView());
-                refreshIptcChoiceBox(main.getCurrPicturePm().getIptc());
+                refreshIptc(main.getCurrPicturePm().getIptc(),main.getCurrPicturePm().getPhotographer());
                 refreshExifChoiceBox(main.getCurrPicturePm().getExifList());
                 save.setDisable(false);
+                generatePicReport.setDisable(false);
+                generateTagReport.setDisable(false);
+                generatePicReport.setOnAction(Event -> generatePicReport());
+                generateTagReport.setOnAction(Event -> generateTagReport());
             });
         } catch (FileNotFoundException fnf) {
             mcLogger.error(fnf);
@@ -164,7 +175,6 @@ public class MainController extends AbstractController {
         }
         exifChoiceBox.setItems(exifsStrings);
         // The default value needs to be set - I did not find a smarter way than simply using the eventHandle for the initial value - but it works fine!
-        //TODO clean up double use of text refresh
         exifChoiceBox.setValue(exifsStrings.get(0));
         exifValue.setText(main.getCurrPicturePm().getExifByIndex(0).getName());
         exifDescription.setText(main.getCurrPicturePm().getExifByIndex(0).getDescription());
@@ -176,9 +186,10 @@ public class MainController extends AbstractController {
     }
 
     @FXML
-    public void refreshIptcChoiceBox(IPTC_PM iptcPm) {
+    public void refreshIptc(IPTC_PM iptcPm, Photographer photographer) {
         HashMap<String,String> iptcList = iptcPm.getValues();
-        photographer.setText(iptcList.get("Photographer"));
+        firstName.setText(photographer.getFirstName());
+        lastName.setText(photographer.getLastName());
         copyright.setText(iptcList.get("Copyright"));
         tags.setText(iptcList.get("Tags"));
     }
@@ -187,9 +198,34 @@ public class MainController extends AbstractController {
     public void saveIptcChanges() {
         // changes also need to be saved in picturePreviewList or loaded into the database so it can be grabbed again
         BusinessLayer bl = BusinessLayer.getInstance();
-        bl.updateIptc(photographer.getText(),copyright.getText(),tags.getText(),main.getCurrPicturePm());
+        bl.updateIptc(copyright.getText(),tags.getText(),main.getCurrPicturePm());
+        boolean valid = bl.updateAssignment(firstName.getText(),lastName.getText(),main.getCurrPicturePm());
+        if(!valid) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Business Layer Warning");
+            alert.setContentText("Picture Assignment failed. Either wrong info or non-existing Photographer.");
+            alert.showAndWait();
+        }
         //is page refreshing even needed? - yes because the current Picture presentation model still has the old info
-        main.getPictureListPm().refreshPictureList(); //this should be called from Business Layer but does it make sense to call BL so that it then calls the pictureList function?
+        main.refresh();
+        refreshIptc(main.getCurrPicturePm().getIptc(),main.getCurrPicturePm().getPhotographer());
+    }
+
+    @FXML
+    public void generatePicReport() {
+        try {
+            String name = main.getCurrPicturePm().getName().split("\\.")[0] + ".pdf";
+            PictureReport rpt = new PictureReport(name, main.getCurrPicturePm());
+            rpt.create();
+            rpt.show();
+        } catch (IOException ioe) {
+            mcLogger.error(ioe.getMessage());
+        }
+    }
+
+    @FXML
+    public void generateTagReport() {
+        // do something here
     }
 
 }

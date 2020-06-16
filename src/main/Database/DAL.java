@@ -23,5 +23,5 @@ public interface DAL {
     void addIptc(int picID, String type, String value) throws Exception;
     void updateIptc(int iptcID, String value) throws Exception;
     void assignPhotographer(int picID, String lastName) throws Exception;
-    void assignPhotographer(int picID, String firstName, String lastName) throws Exception;
+    boolean assignPhotographer(int picID, String firstName, String lastName) throws Exception;
 }

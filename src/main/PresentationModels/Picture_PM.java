@@ -1,10 +1,7 @@
 package main.PresentationModels;
 
 import main.Database.DBConnection;
-import main.Models.EXIF;
-import main.Models.IPTC;
-import main.Models.IPTCModel;
-import main.Models.Picture;
+import main.Models.*;
 import javafx.beans.property.*;
 
 import java.util.ArrayList;
@@ -14,8 +11,8 @@ public class Picture_PM {
     private IntegerProperty id = new SimpleIntegerProperty();
     private StringProperty name = new SimpleStringProperty();
     private ObjectProperty<IPTC_PM> iptc = new SimpleObjectProperty<>();
-//    private IPTC_PM iptc = new IPTC_PM(new IPTC());
     private ObjectProperty<List<EXIF_PM>> exifList = new SimpleObjectProperty<>();
+    private ObjectProperty<Photographer> photographer = new SimpleObjectProperty<>();
     private Picture model;
 
     public Picture_PM(Picture model) {
@@ -24,24 +21,21 @@ public class Picture_PM {
         name.set((model.getName()));
         iptc.set(new IPTC_PM(model.getIPTC()));
         exifList.set(mToPm(model.getExifList()));
+        photographer.set(model.getPhotographer());
     }
 
     public int getID() {
         return id.get();
     }
-
     public String getName() {
         return name.get();
     }
-
-    public IPTC_PM getIptc() {
-//        return iptc;
-        return iptc == null ? new IPTC_PM(new IPTC()) : iptc.get();
-    }
-
+    public IPTC_PM getIptc() { return iptc == null ? new IPTC_PM(new IPTC()) : iptc.get(); }
     public List<EXIF_PM> getExifList() {
         return exifList.get();
     }
+    public Photographer getPhotographer() { return photographer.get(); }
+    public void setPhotographer(Photographer photographer) { this.photographer.set(photographer); }
 
     // due to me not wanting to make a fixed variation of exifs, I need to convert the exif list into a Presentation model list
     public List<EXIF_PM> mToPm(List<EXIF> exifList) {
@@ -56,16 +50,5 @@ public class Picture_PM {
         //I did not find a good way to set the default value for the exif choice box, so I had to catch the -1 first value and return the initial exif for it.
         return index == -1 ? exifList.get().get(0) : exifList.get().get(index);   // first get to receive exif list, second one to receive certain pm with index.
     }
-
-    //currently not in use - could be used instead of manual evaluation of all 3 values in Business Layer
-//    public void updateIptc(IPTC_PM iptcPm) {
-//        //iptc.saveNewIptc(model.getIptc);
-//        refresh(model);
-//    }
-
-//    public void refresh(Picture model) {
-//        this.model = model;
-//        iptc.refreshIptc(model.getIPTC());
-//    }
 
 }

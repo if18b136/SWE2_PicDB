@@ -15,7 +15,6 @@ import java.util.List;
 
 public class DBConnection {
     final static Logger DBConLogger = LogManager.getLogger("Database Connection");
-    //TODO change complete EXIF access into fixed data instead of variable strings
     private static DBConnection jdbc;
     private Connection con;
     private String url = "";
@@ -65,7 +64,7 @@ public class DBConnection {
             picNameID = result.getInt(1);
         }
         result.close();
-        return picNameID;   //TODO handle picture not found - will be handled in DAL
+        return picNameID;
     }
 
     public void uploadPic(String name/*, Date date*/, String expTime, String maker, String model) throws SQLException {
@@ -126,7 +125,7 @@ public class DBConnection {
 
     public List<Photographer> retrievePhotographers() throws SQLException {
         PreparedStatement retrievePhotographers = con.prepareStatement("select ID, VORNAME, NACHNAME, GEBURTSTAG, NOTIZEN from picdb.person");
-        ResultSet result =retrievePhotographers.executeQuery();
+        ResultSet result = retrievePhotographers.executeQuery();
         List<Photographer> photographerList = new ArrayList<>();
         while (result.next()) {
             Photographer photographer = new Photographer();
@@ -210,10 +209,22 @@ public class DBConnection {
     }
 
     public void newPicPhotographer(int picID, int personID) throws SQLException {
-        PreparedStatement addPicturePerson = con.prepareStatement("insert into picdb.picture_person(FK_PICTURE_ID,FK_PERSON_ID) values(?,?)");
-        addPicturePerson.setInt(1,picID);
-        addPicturePerson.setInt(2,personID);
-        addPicturePerson.execute();
+        PreparedStatement assignment = con.prepareStatement("select count(*) from picdb.picture_person where FK_PICTURE_ID=?");//only one assignment per picture allowed
+        assignment.setInt(1,picID);
+        ResultSet result = assignment.executeQuery();
+        if(result.next()) {
+            if(result.getInt(1) != 0) {
+                assignment = con.prepareStatement("update picdb.picture_person set FK_PERSON_ID=? where FK_PICTURE_ID=?");
+                assignment.setInt(1,personID);
+                assignment.setInt(2,picID);
+                assignment.execute();
+            } else {
+                PreparedStatement addPicturePerson = con.prepareStatement("insert into picdb.picture_person(FK_PICTURE_ID,FK_PERSON_ID) values(?,?)");
+                addPicturePerson.setInt(1,picID);
+                addPicturePerson.setInt(2,personID);
+                addPicturePerson.execute();
+            }
+        }
     }
 
     //TODO person needs uniqueness or else simply checking for lastname is not enough to get a single output eventually
@@ -248,8 +259,6 @@ public class DBConnection {
             exif.setDescription(result.getString(3));
             pic.addEXIF(exif);
         }
-        //TODO get photographer name from database entry instead of as a written string - probably needs db changes to metadata table
-        System.out.println("Picture: " + name);
         PreparedStatement getIPTC = con.prepareStatement("select ID,NAME,DESCRIPTION from picdb.metadata where FK_MD_PICTURE_ID=(select id from picture where name=?) and TYPE='IPTC'");
         getIPTC.setString(1, name);
         result = getIPTC.executeQuery();
@@ -261,19 +270,38 @@ public class DBConnection {
                     iptc.setCopyrightID(result.getInt(1));
                     iptc.setCopyright(result.getString(3));
                     break;
-                case "Photographer":
-                    iptc.setPhotographerID(result.getInt(1));
-                    iptc.setPhotographer(result.getString(3));
-                    break;
+//                case "Photographer":
+//                    iptc.setPhotographerID(result.getInt(1));
+//                    iptc.setPhotographer(result.getString(3));
+//                    break;
                 case "Tags":
                     iptc.setTagListID(result.getInt(1));
                     iptc.setTagList(result.getString(3));
                     break;
                 default:
-                    //TODO add error when other type found.
+                    DBConLogger.warn("Warning at DBConnection.createPicModel: Non-Standard EXIF Type found.");
             }
         }
         pic.setIPTC(iptc);
+
+        Photographer photographer = new Photographer();
+        PreparedStatement getPhotographer = con.prepareStatement("select FK_PERSON_ID from picdb.picture_person where FK_PICTURE_ID=?");
+        getPhotographer.setInt(1,id);
+        result = getPhotographer.executeQuery();
+        if(result.next()) {
+            int photographerID = result.getInt(1);
+            getPhotographer = con.prepareStatement("select * from picdb.person where ID=?");
+            getPhotographer.setInt(1,photographerID);
+            result = getPhotographer.executeQuery();
+            if(result.next()) {
+                photographer.setID(result.getInt(1));
+                photographer.setFirstName(result.getString(2));
+                photographer.setLastName(result.getString(3));
+                photographer.setBirthDay(result.getDate(4).toLocalDate());
+                photographer.setNotes(result.getString(5));
+            }
+        }
+        pic.setPhotographer(photographer);
         return pic;
     }
 

@@ -23,4 +23,10 @@ public class MainWindowPM {
     public PictureList_PM getPictureListPm() { return this.pictureListPm; }
     public void setPictureListPm(PictureList_PM pictureListPm) { this.pictureListPm = pictureListPm; }
 
+    public void refresh() {
+        pictureListPm.refreshPictureList();
+        if(pictureListPm.getCurrentPicIndex() != -1) {
+            this.setCurrPicturePm(this.getPictureListPm().getCurPicView());
+        }
+    }
 }

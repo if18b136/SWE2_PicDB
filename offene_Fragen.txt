@@ -1,22 +1,13 @@
-//TODO 01: add MainWindowViewModel - 3
-//TODO 02: add PhotographerList - 5
 //TODO 03: add PhotographerViewModel - 7
-//TODO 04: correct Exception handling - 1
 //TODO 05: Logger use instead of sout - 1
-//TODO 06: report for single picture print - 7
 //TODO 07: report for tag with photo list - 4
-//TODO 08: Unit Tests - 9
 //TODO 09: java code documentation - 0
 //TODO 10: 1 site documentation - 6
 //TODO 11: Picture search function - 8
-//TODO 12: Config file - 9 - DONE - from where do I need to load the creds for the db connection
-//TODO 13: Database Factory Mock - 9
 //TODO 14: Time documentation - 2
-//TODO 15: DALFactory as object from business layer class or call in each instance?
-//TODO 16: Frage - wieso genuegt es nicht, einmal @FXML zu setzen fuer die folgenden zeilen, so wie bei @Overwrite?
-//TODO 17: Save Buttons need to be deactivated when nothing is selected
+//TODO 18: implement true DALException with own class
 
-
+FXML muss immer wieder neu gesetzt werden - wieso nicht nur einmal und alle direkt darunter liegenden zeilen werden betroffen wie bei Overload?
 
 System Menu - ist das fr uns wichtig - geht um die gesplittete Menu Bar
 - Nein soll eigens erstellt und befuellt werden

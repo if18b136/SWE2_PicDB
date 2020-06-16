@@ -40,9 +40,14 @@ public class DataAccessLayer implements DAL {
             if(id == -1 ) {
                 throw new Exception("DALException at DAL.addPicture: Receiving ID to picture named " + name + " failed");
             }
-            return con.createPicModel(id,name); // TODO add Exception for empty model when pic not found
+            Picture pic = con.createPicModel(id,name);
+            if(pic.getID() != -1) {
+                return  pic;
+            } else {
+                throw new Exception("DALException at DAL.getPicture: Picture Model could not be created.");
+            }
         } catch(SQLException sql) {
-            throw new Exception("DALException at DAL.getPicture: "+ sql.getMessage()); //TODO implement true DALException with own class
+            throw new Exception("DALException at DAL.getPicture: "+ sql.getMessage());
         }
     }
 
@@ -174,15 +179,16 @@ public class DataAccessLayer implements DAL {
     }
 
     @Override
-    public void assignPhotographer(int picID, String firstName, String lastName) throws Exception {
+    public boolean assignPhotographer(int picID, String firstName, String lastName) throws Exception {
         try{
             DBConnection con = DBConnection.getInstance();
             // evaluate if there is already a photographer with the name
             int photographerID = con.checkPhotographer(firstName, lastName);   //returns either the ID or 0 for no entry found
-            if(photographerID == 0) {   // name does not exist, create new photographer
-                photographerID = con.addNewPhotographer(firstName, lastName); // return new ID
+            if(photographerID > 0) {
+                con.newPicPhotographer(picID,photographerID);
+                return true;
             }
-            con.newPicPhotographer(picID,photographerID);
+            return false;
         } catch(SQLException sql) {
             DALLogger.error(sql.getMessage());
             throw new Exception("DALException at DAL.assignPhotographer: " + sql.getMessage());

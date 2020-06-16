@@ -4,8 +4,7 @@ import main.Database.DAL;
 import main.Database.DALFactory;
 import main.Models.Photographer;
 import main.Models.Picture;
-import main.PresentationModels.Photographer_PM;
-import main.PresentationModels.Picture_PM;
+import main.PresentationModels.*;
 import main.Service.BusinessLayer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,11 +28,6 @@ public class UnitTests {
 
     @AfterEach
     public void tearDown() {
-
-    }
-
-    @Test
-    public void Mock() {
 
     }
 
@@ -214,4 +208,21 @@ public class UnitTests {
         assertTrue(bl.validatePhotographer(firstName,lastName,birthday,notes));
     }
 
+    @Test
+    public void MainWindowViewModelTest() {
+        MainWindowPM main = new MainWindowPM();
+        assertNotNull(main);
+    }
+
+    @Test
+    public void MainWindowViewModelReturnsPresentationModelsTest() {
+        MainWindowPM main = new MainWindowPM();
+        assertNotNull(main);
+        PictureList_PM pictureListPm = main.getPictureListPm();
+        Picture_PM picturePm = main.getCurrPicturePm();
+        PhotographerList_PM photographerListPm = main.getPhotographerListPm();
+        assertNotNull(pictureListPm);
+        assertNotNull(picturePm);
+        assertNotNull(photographerListPm);
+    }
 }

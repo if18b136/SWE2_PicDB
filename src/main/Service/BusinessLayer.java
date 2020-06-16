@@ -47,6 +47,7 @@ public class BusinessLayer {
     public void initPicNameList() {
         try{
             DAL dal =  DALFactory.getDAL();
+            this.picList = new HashMap<>();
             picList = dal.getAllPictureNames(); // return list of finished Picture_PMs would be the most direct way
         } catch (Exception e) {
             BLLogger.error(e.getMessage());
@@ -112,10 +113,10 @@ public class BusinessLayer {
     }
 
     // complete list of currently existing pictures - turned into PresentationModels
-    //TODO IPTC data does not get read
     public void createPicList() {
         try{
             DAL dal = DALFactory.getDAL();
+            this.picPmList = new ArrayList<>(); // delete old entries - create new ones - probably should not make a private callable list in business layer
             for(Map.Entry<Integer,String> pic : picList.entrySet()) {
                 Picture_PM picture_pm = dal.createPictureModel(pic.getKey(),pic.getValue());
                 picPmList.add(picture_pm);
@@ -176,15 +177,15 @@ public class BusinessLayer {
         return null;
     }
 
-    public void updateIptc(String photographer, String copyright, String tagList, Picture_PM curPicPm) {
+    public void updateIptc(String copyright, String tagList, Picture_PM curPicPm) {
         //first evaluate changes and set them
-        if(!photographer.equals(curPicPm.getIptc().getPhotographer())) {
-            curPicPm.getIptc().setPhotographer(photographer);
-        }
+//        if(!photographer.equals(curPicPm.getIptc().getPhotographer())) {
+//            curPicPm.getIptc().setPhotographer(photographer);
+//        }
         if(!copyright.equals(curPicPm.getIptc().getCopyright())) {
             curPicPm.getIptc().setCopyright(copyright);
         }
-        if(!photographer.equals(curPicPm.getIptc().getTagList())) {
+        if(!tagList.equals(curPicPm.getIptc().getTagList())) {
             curPicPm.getIptc().setTagList(tagList);
         }
         changeIptcData(curPicPm);
@@ -195,13 +196,13 @@ public class BusinessLayer {
             //TODO rules for invalid updates
             //look  for existing iptc database entries
             DAL dal =  DALFactory.getDAL();
-            if(picPM.getIptc().getPhotographerID() == -1) {
-                if(validPhotographer(picPM.getID(),picPM.getIptc().getPhotographer())) {
-                    dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getPhotographer());
-                }
-            } else {
-                dal.updateIptc(picPM.getIptc().getPhotographerID(),picPM.getIptc().getPhotographer());
-            }
+//            if(picPM.getIptc().getPhotographerID() == -1) {
+//                if(validPhotographer(picPM.getID(),picPM.getIptc().getPhotographer())) {
+//                    dal.addIptc(picPM.getID(),"Photographer",picPM.getIptc().getPhotographer());
+//                }
+//            } else {
+//                dal.updateIptc(picPM.getIptc().getPhotographerID(),picPM.getIptc().getPhotographer());
+//            }
             if(picPM.getIptc().getCopyrightID() == -1) {
                 dal.addIptc(picPM.getID(),"Copyright",picPM.getIptc().getCopyright());
             } else {
@@ -217,33 +218,14 @@ public class BusinessLayer {
         }
     }
 
-    // validates the photographer String - returns true AND creates new DB link to picture if valid, else returns false
-    public boolean validPhotographer( int picID, String photographer) {
-        try {
-            //TODO RegEx check
-            DAL dal =  DALFactory.getDAL();
-            String[] split = photographer.split(" ");   // split string up
-            if(split[0].length() <= 100) {   // entry needs to be <= 100 to be valid for name AND surname
-                if(split.length == 1 && split[0].length() <= 50) {     // only one name inserted - last name needs to be set so input will be interpreted as last name
-                    dal.assignPhotographer(picID,photographer);
-                    BLLogger.info("valid Person - last name");
-                    return true;
-                } else if(split.length == 2) {  // we have both name and surname
-                    if (split[1].length() <= 50 ) {
-                        dal.assignPhotographer(picID,split[0],split[1]);
-                        BLLogger.info("valid Person - full name");
-                        return true;
-                    }
-                } else if(split.length == 3) {     // middle name also there
-                    if((split[0].length() + split[1].length()) <= 100 && split[2].length() <= 50) {
-                        dal.assignPhotographer(picID,(split[0] + " " + split[1]),split[2]);  //TODO improve string concatenation
-                        BLLogger.info("valid Person - full + middle name");
-                        return true;
-                    }
-                }
+    public boolean updateAssignment(String firstName, String lastName, Picture_PM curPicPm) {
+        try{
+            if(validatePhotographer(firstName,lastName,curPicPm.getPhotographer().getBirthDay(), curPicPm.getPhotographer().getNotes())){
+                DAL dal =  DALFactory.getDAL();
+                return dal.assignPhotographer(curPicPm.getID(), firstName, lastName);
             }
             return false;
-        } catch (Exception e) {
+       } catch (Exception e) {
             BLLogger.error(e.getMessage());
         }
         return false;

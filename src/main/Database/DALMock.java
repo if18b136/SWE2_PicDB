@@ -114,5 +114,7 @@ public class DALMock implements DAL{
     public void assignPhotographer(int picID, String lastName) { }
 
     @Override
-    public void assignPhotographer(int picID, String firstName, String lastName) { }
+    public boolean assignPhotographer(int picID, String firstName, String lastName) {
+        return true;
+    }
 }

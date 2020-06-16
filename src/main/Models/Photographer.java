@@ -28,4 +28,8 @@ public class Photographer implements PhotographerModel{
     @Override
     public String getNotes() { return this.notes; }
     public void setNotes(String value) { this.notes = value; }
+
+    public String getFullName() {
+        return this.firstName.length() > 0 ? (this.firstName + " " + this.lastName) : this.lastName;
+    }
 }

@@ -30,18 +30,18 @@ public class PictureList_PM {
         System.out.println("User clicked on " + pictureList.get(index).getName());
     }
 
+    public int getCurrentPicIndex() { return this.currentPicIndex.get(); }
     public List<Picture_PM> getPictureList() { return this.pictureList; }
 
-    // TODO - evaluate if refresh is needed anywhere
     public void refreshPictureList(){
         BusinessLayer bl = BusinessLayer.getInstance();
         bl.initPicNameList();
         bl.createPicList();
         pictureList = bl.getPicList();
-
-        if (!pictureList.get(currentPicIndex.get()).getName().equals(currentPicName.get())) {
-            //pic not there anymore
-            currentPicIndex.set(-1);
-        } // else is redundant because we already have the index set if the picture still exists
+        if(currentPicIndex.get() != -1) {
+            if (!pictureList.get(currentPicIndex.get()).getName().equals(currentPicName.get())) { //pic not there anymore
+                currentPicIndex.set(-1);
+            } // else is redundant because we already have the index set if the picture still exists
+        }
     }
 }
