@@ -9,6 +9,7 @@ import com.itextpdf.text.pdf.BadPdfFormatException;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import main.Models.EXIF;
+import main.Models.Picture;
 import main.PresentationModels.EXIF_PM;
 import main.PresentationModels.Picture_PM;
 import org.apache.logging.log4j.LogManager;
@@ -63,7 +64,6 @@ public class PictureReport extends Reporting{
             PdfPTable table = new PdfPTable(2);
             table.setSpacingBefore(10.0f);
             PdfPCell cell = new PdfPCell(new Paragraph("Photographer:"));
-            cell.setColspan(2);
             table.addCell(cell);
             table.addCell(picturePm.getPhotographer().getFullName());
             getPdf().add(table);
