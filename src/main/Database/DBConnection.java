@@ -3,7 +3,6 @@ import main.Models.EXIF;
 import main.Models.IPTC;
 import main.Models.Photographer;
 import main.Models.Picture;
-import main.PresentationModels.Picture_PM;
 import main.Service.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +12,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ResourceBundle;
 
 public class DBConnection {
     final static Logger DBConLogger = LogManager.getLogger("Database Connection");
@@ -146,13 +144,21 @@ public class DBConnection {
         return photographerList;
     }
 
-    public void addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws SQLException {
+    public int addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws SQLException {
         PreparedStatement addNewPhotographer = con.prepareStatement("insert into picdb.person(VORNAME,NACHNAME,GEBURTSTAG,NOTIZEN) values(?,?,?,?)");
         addNewPhotographer.setString(1,firstName);
         addNewPhotographer.setString(2,lastName);
         addNewPhotographer.setDate(3, Date.valueOf(birthday));
         addNewPhotographer.setString(4,notes);
         addNewPhotographer.execute();
+        addNewPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
+        addNewPhotographer.setString(1,lastName);
+        ResultSet result = addNewPhotographer.executeQuery();
+        int id = 0;
+        while (result.next()) {
+            id = result.getInt(1);
+        }
+        return id;
     }
 
     public void editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) throws SQLException {

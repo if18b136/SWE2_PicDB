@@ -1,6 +1,8 @@
 package main.Database;
 
 import main.Models.EXIF;
+import main.Models.IPTC;
+import main.Models.Photographer;
 import main.Models.Picture;
 import main.PresentationModels.Photographer_PM;
 import main.PresentationModels.Picture_PM;
@@ -23,61 +25,94 @@ public class DALMock implements DAL{
     }
 
     @Override
-    public List<Photographer_PM> retrievePhotographers() throws Exception {
-        return null;
+    public List<Photographer_PM> retrievePhotographers() {
+        List<Photographer_PM> photographerPmList = new ArrayList<>();
+        Photographer_PM photographerPm1 = new Photographer_PM(new Photographer());
+        Photographer_PM photographerPm2 = new Photographer_PM(new Photographer());
+        Photographer_PM photographerPm3 = new Photographer_PM(new Photographer());
+        photographerPmList.add(photographerPm1);
+        photographerPmList.add(photographerPm2);
+        photographerPmList.add(photographerPm3);
+        return photographerPmList;
     }
 
     @Override
-    public void addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws Exception {
-
+    public Photographer addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) {
+        Photographer photographer = new Photographer();
+        photographer.setID(1);
+        photographer.setFirstName(firstName);
+        photographer.setLastName(lastName);
+        photographer.setBirthDay(birthday);
+        photographer.setNotes(notes);
+        return photographer;
     }
 
     @Override
-    public void editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) throws Exception {
-
+    public Photographer editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) {
+        Photographer photographer = new Photographer();
+        photographer.setID(ID);
+        photographer.setFirstName(firstName);
+        photographer.setLastName(lastName);
+        photographer.setBirthDay(birthday);
+        photographer.setNotes(notes);
+        return photographer;
     }
 
     @Override
-    public void deletePhotographer(int ID) throws Exception {
-
-    }
+    public void deletePhotographer(int ID) { }
 
     @Override
-    public Picture addNewPicture(String name, String expTime, String maker, String model) throws Exception {
+    public Picture addNewPicture(String name, String expTime, String maker, String model) {
         Picture pic = new Picture();
         pic.setName(name);
         pic.setID(1);
-        return null;
-
+        pic.setName(name);
+        pic.setIPTC(new IPTC());
+        EXIF exif1 = new EXIF();
+        EXIF exif2 = new EXIF();
+        EXIF exif3 = new EXIF();
+        exif1.setID(1);
+        exif1.setName("expTime");
+        exif1.setDescription(expTime);
+        exif2.setID(2);
+        exif2.setName("maker");
+        exif2.setDescription(maker);
+        exif3.setID(3);
+        exif3.setName("model");
+        exif3.setDescription(model);
+        List<EXIF> exifList = new ArrayList<>();
+        exifList.add(exif1);
+        exifList.add(exif2);
+        exifList.add(exif3);
+        pic.setExifList(exifList);
+        return pic;
     }
 
     @Override
-    public HashMap<Integer, String> getAllPictureNames() throws Exception {
-        return null;
+    public HashMap<Integer, String> getAllPictureNames() {
+        HashMap<Integer, String> pictureNames = new HashMap<>();
+        pictureNames.put(1,"Cat");
+        pictureNames.put(2,"Dog");
+        pictureNames.put(3,"Chicken");
+        return pictureNames;
     }
 
     @Override
-    public Picture_PM createPictureModel(int id, String name) throws Exception {
-        return null;
+    public Picture_PM createPictureModel(int id, String name) {
+        Picture picture = addNewPicture(name, "1/100","CANON","XPS 100");
+        picture.setID(id);
+        return new Picture_PM(picture);
     }
 
     @Override
-    public void addIptc(int picID, String type, String value) throws Exception {
-
-    }
+    public void addIptc(int picID, String type, String value) { }
 
     @Override
-    public void updateIptc(int iptcID, String value) throws Exception {
-
-    }
+    public void updateIptc(int iptcID, String value) { }
 
     @Override
-    public void assignPhotographer(int picID, String lastName) throws Exception {
-
-    }
+    public void assignPhotographer(int picID, String lastName) { }
 
     @Override
-    public void assignPhotographer(int picID, String firstName, String lastName) throws Exception {
-
-    }
+    public void assignPhotographer(int picID, String firstName, String lastName) { }
 }

@@ -61,20 +61,34 @@ public class DataAccessLayer implements DAL {
     }
 
     @Override
-    public void addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws Exception {
+    public Photographer addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws Exception {
         try{
             DBConnection con = DBConnection.getInstance();
-            con.addNewPhotographer(firstName,lastName,birthday,notes);
+            int ID = con.addNewPhotographer(firstName,lastName,birthday,notes);
+            Photographer photographer = new Photographer();
+            photographer.setID(ID);
+            photographer.setFirstName(firstName);
+            photographer.setLastName(lastName);
+            photographer.setBirthDay(birthday);
+            photographer.setNotes(notes);
+            return photographer;
         }  catch (SQLException sql) {
-            throw new Exception("DALException at DAL.addNewPhotographer: "+ sql.getMessage());
+            throw new Exception("DALException at DAL.addNewPhotographer: " + sql.getMessage());
         }
     }
 
     @Override
-    public void editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) throws Exception {
+    public Photographer editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) throws Exception {
         try{
             DBConnection con = DBConnection.getInstance();
             con.editPhotographer(ID,firstName,lastName,birthday,notes);
+            Photographer photographer = new Photographer();
+            photographer.setID(ID);
+            photographer.setFirstName(firstName);
+            photographer.setLastName(lastName);
+            photographer.setBirthDay(birthday);
+            photographer.setNotes(notes);
+            return photographer;
         }  catch (SQLException sql) {
             throw new Exception("DALException at DAL.editPhotographer: "+ sql.getMessage());
         }

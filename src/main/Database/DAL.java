@@ -1,5 +1,6 @@
 package main.Database;
 
+import main.Models.Photographer;
 import main.Models.Picture;
 import main.PresentationModels.Photographer_PM;
 import main.PresentationModels.Picture_PM;
@@ -13,8 +14,8 @@ public interface DAL {
     //List<Photographer> getPhotographers(); TODO add photographer class in Models
     Picture getPicture(String name) throws Exception;
     List<Photographer_PM> retrievePhotographers() throws Exception;
-    void addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws Exception;
-    void editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) throws Exception;
+    Photographer addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws Exception;
+    Photographer editPhotographer(int ID, String firstName, String lastName, LocalDate birthday, String notes) throws Exception;
     void deletePhotographer(int ID) throws Exception;
     Picture addNewPicture(String name/*, Date date*/, String expTime, String maker, String model) throws Exception;
     HashMap<Integer, String> getAllPictureNames() throws Exception;

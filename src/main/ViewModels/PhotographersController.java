@@ -38,6 +38,7 @@ public class PhotographersController extends AbstractController {
     public void initialize(URL url, ResourceBundle resources) {
         super.initialize(url, resources);
         initPhotographerList();
+        System.out.println("DATEPICKER RESTRICTION STILL MISSING FOR DATE > TODAY");
     }
 
     public void loadPhotographerList() {
