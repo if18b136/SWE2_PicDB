@@ -31,10 +31,4 @@ public interface EXIFModel {
      */
     boolean getFlash();
     void setFlash(boolean value);
-
-    /**
-     * The exposure program
-     */
-    ExposurePrograms getExposureProgram();
-    void setExposureProgram(ExposurePrograms value);
 }

@@ -25,9 +25,4 @@ public interface PictureModel {
     EXIFModel getEXIF();
     void setEXIF(EXIFModel value);
 
-    /**
-     *  The camera (optional)
-     */
-    CameraModel getCamera();
-    void setCamera(CameraModel value);
 }

@@ -7,10 +7,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import main.Database.DBConnection;
 import main.Models.Picture;
-import main.PresentationModels.EXIF_PM;
-import main.PresentationModels.IPTC_PM;
-import main.PresentationModels.PictureList_PM;
-import main.PresentationModels.Picture_PM;
+import main.PresentationModels.*;
 import main.Service.Binding;
 import main.Service.BusinessLayer;
 
@@ -40,8 +37,7 @@ import java.util.ResourceBundle;
 public class MainController extends AbstractController {
     final Logger mcLogger = LogManager.getLogger("Main Controller");
     FileChooser fc = new FileChooser();
-    Picture_PM picturePM = new Picture_PM(new Picture());
-    PictureList_PM pictureListPM = new PictureList_PM();
+    MainWindowPM main = new MainWindowPM();
 
     @FXML
     ImageView picView;
@@ -86,7 +82,6 @@ public class MainController extends AbstractController {
         preview.setPreserveRatio(true);
         preview.fitHeightProperty().bind(picPreview.heightProperty());
         preview.fitWidthProperty().bind(picPreview.widthProperty());
-        //preview.setFitWidth(100); // solves scroll problem but makes list not well-resizeable
     }
 
     @FXML
@@ -95,15 +90,15 @@ public class MainController extends AbstractController {
         Path src = Paths.get(selectedFile.getAbsolutePath());
         BusinessLayer bl = BusinessLayer.getInstance();
         String namePath = bl.getPath() + selectedFile.getName();
-        picturePM = bl.extractMetadata(selectedFile, src);
+        main.setCurrPicturePm(bl.extractMetadata(selectedFile, src));
         FileInputStream fis = new FileInputStream(namePath);
         Image pic = new Image(fis);
         picView.setImage(pic);
         setPicBindings();
         addPreview(pic);
 
-        refreshIptcChoiceBox(picturePM.getIptc());
-        refreshExifChoiceBox(picturePM.getExifList());
+        refreshIptcChoiceBox(main.getCurrPicturePm().getIptc());
+        refreshExifChoiceBox(main.getCurrPicturePm().getExifList());
         picPreview.getSelectionModel().selectLast();    //automatically select the newly added picture in the preview to let it look like an instant selection from preview
     }
 
@@ -135,10 +130,10 @@ public class MainController extends AbstractController {
     // File needs String, so I changed Path input to String input
     public void initPreview() {
         try{
-            if(!pictureListPM.getPictureList().isEmpty()) {
+            if(!main.getPictureListPm().getPictureList().isEmpty()) {
                 BusinessLayer bl = BusinessLayer.getInstance();
-                for (Picture_PM picPM : pictureListPM.getPictureList()) {
-                    FileInputStream fis = new FileInputStream((bl.getPath() + picPM.getName()));
+                for(Picture_PM picturePm : main.getPictureListPm().getPictureList()) {
+                    FileInputStream fis = new FileInputStream(bl.getPath() + picturePm.getName());
                     Image img = new Image(fis);
                     addPreview(img);
                 }
@@ -150,10 +145,10 @@ public class MainController extends AbstractController {
                 picView.setImage(picPreview.getSelectionModel().getSelectedItem().getImage());
                 setPicBindings(); // don't forget to call the resizing again
                 // Set picture presentation model to current picture, change index and name in list presentation model
-                pictureListPM.setCurrentPic(picPreview.getItems().indexOf(picPreview.getSelectionModel().getSelectedItem()));
-                picturePM = pictureListPM.getCurPicView();
-                refreshExifChoiceBox(picturePM.getExifList());
-                refreshIptcChoiceBox(picturePM.getIptc());
+                main.getPictureListPm().setCurrentPic(picPreview.getItems().indexOf(picPreview.getSelectionModel().getSelectedItem()));
+                main.setCurrPicturePm(main.getPictureListPm().getCurPicView());
+                refreshIptcChoiceBox(main.getCurrPicturePm().getIptc());
+                refreshExifChoiceBox(main.getCurrPicturePm().getExifList());
                 save.setDisable(false);
             });
         } catch (FileNotFoundException fnf) {
@@ -171,16 +166,15 @@ public class MainController extends AbstractController {
         // The default value needs to be set - I did not find a smarter way than simply using the eventHandle for the initial value - but it works fine!
         //TODO clean up double use of text refresh
         exifChoiceBox.setValue(exifsStrings.get(0));
-        exifValue.setText(picturePM.getExifByIndex(0).getName());
-        exifDescription.setText(picturePM.getExifByIndex(0).getDescription());
+        exifValue.setText(main.getCurrPicturePm().getExifByIndex(0).getName());
+        exifDescription.setText(main.getCurrPicturePm().getExifByIndex(0).getDescription());
 
         exifChoiceBox.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> os,String old_str, String new_str) -> {
-            exifValue.setText(picturePM.getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getName());
-            exifDescription.setText(picturePM.getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getDescription());
+            exifValue.setText(main.getCurrPicturePm().getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getName());
+            exifDescription.setText(main.getCurrPicturePm().getExifByIndex(exifChoiceBox.getSelectionModel().getSelectedIndex()).getDescription());
         });
     }
-
-
+    
     @FXML
     public void refreshIptcChoiceBox(IPTC_PM iptcPm) {
         HashMap<String,String> iptcList = iptcPm.getValues();
@@ -193,9 +187,9 @@ public class MainController extends AbstractController {
     public void saveIptcChanges() {
         // changes also need to be saved in picturePreviewList or loaded into the database so it can be grabbed again
         BusinessLayer bl = BusinessLayer.getInstance();
-        bl.updateIptc(photographer.getText(),copyright.getText(),tags.getText(),picturePM);
+        bl.updateIptc(photographer.getText(),copyright.getText(),tags.getText(),main.getCurrPicturePm());
         //is page refreshing even needed? - yes because the current Picture presentation model still has the old info
-        pictureListPM.refreshPictureList(); //this should be called from Business Layer but does it make sense to call BL so that it then calls the pictureList function?
+        main.getPictureListPm().refreshPictureList(); //this should be called from Business Layer but does it make sense to call BL so that it then calls the pictureList function?
     }
 
 }
