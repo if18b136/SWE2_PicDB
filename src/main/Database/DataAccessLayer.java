@@ -202,4 +202,14 @@ public class DataAccessLayer implements DAL {
             throw new Exception("DALException at DAL.assignPhotographer: " + sql.getMessage());
         }
     }
+
+    @Override
+    public HashMap<String,Integer> getTagMap() throws Exception{
+        try{
+            DBConnection con = DBConnection.getInstance();
+            return con.getTagMap();
+        } catch(SQLException sql) {
+            throw new Exception("DALException at DAL.getTagMap: " + sql.getMessage());
+        }
+    }
 }

@@ -7,6 +7,7 @@ import main.Models.Picture;
 import main.PresentationModels.Photographer_PM;
 import main.PresentationModels.Picture_PM;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,5 +119,10 @@ public class DALMock implements DAL{
     @Override
     public boolean assignPhotographer(int picID, String firstName, String lastName) {
         return true;
+    }
+
+    @Override
+    public HashMap<String, Integer> getTagMap() throws Exception {
+        return null;
     }
 }

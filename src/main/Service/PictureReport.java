@@ -38,6 +38,7 @@ public class PictureReport extends Reporting{
             }
         } catch (DocumentException de) {
             setError();
+            repLogger.error(de.getMessage());
         }
     }
 

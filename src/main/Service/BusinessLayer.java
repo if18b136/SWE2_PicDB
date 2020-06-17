@@ -228,4 +228,14 @@ public class BusinessLayer {
         }
         return false;
     }
+
+    public HashMap<String,Integer> getTagMap() {
+        try{
+            DAL dal = DALFactory.getDAL();
+            return dal.getTagMap();
+        } catch (Exception e) {
+            BLLogger.error(e.getMessage());
+        }
+        return null;
+    }
 }

@@ -1,5 +1,11 @@
 package main.ViewModels;
 
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -9,8 +15,7 @@ import main.Database.DBConnection;
 import main.Models.Photographer;
 import main.Models.Picture;
 import main.PresentationModels.*;
-import main.Service.Binding;
-import main.Service.BusinessLayer;
+import main.Service.*;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -21,7 +26,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
-import main.Service.PictureReport;
+import main.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,6 +45,7 @@ public class MainController extends AbstractController {
     final Logger mcLogger = LogManager.getLogger("Main Controller");
     FileChooser fc = new FileChooser();
     MainWindowPM main = new MainWindowPM();
+    Search_PM searchModel;
 
     @FXML
     ImageView picView;
@@ -54,11 +60,13 @@ public class MainController extends AbstractController {
     @FXML
     TextArea exifDescription,tags;
     @FXML
-    Button save;
+    Button save,search,reset;
     @FXML
     Pane iptcPane;
     @FXML
     MenuItem generatePicReport, generateTagReport;
+    @FXML
+    TextField searchField;
 
     // init the objects from business layer
     public MainController() throws Exception {
@@ -74,6 +82,8 @@ public class MainController extends AbstractController {
         setPicBindings();
         initPreview();
         //Binding.applyBinding(iptcPane, picturePM.getIptc()); // Does not bind
+        searchModel = new Search_PM();
+        applyBindings();
     }
 
     public void setPicBindings() {
@@ -158,9 +168,7 @@ public class MainController extends AbstractController {
                 refreshExifChoiceBox(main.getCurrPicturePm().getExifList());
                 save.setDisable(false);
                 generatePicReport.setDisable(false);
-                generateTagReport.setDisable(false);
                 generatePicReport.setOnAction(Event -> generatePicReport());
-                generateTagReport.setOnAction(Event -> generateTagReport());
             });
         } catch (FileNotFoundException fnf) {
             mcLogger.error(fnf);
@@ -225,7 +233,25 @@ public class MainController extends AbstractController {
 
     @FXML
     public void generateTagReport() {
-        // do something here
+        try {
+            TagReport rpt = new TagReport("TagReport.pdf");
+//            BankAccountReport rpt = new BankAccountReport("BankAccountReport.pdf");
+            rpt.create();
+            rpt.show();
+        } catch (IOException ioe) {
+            mcLogger.error(ioe.getMessage());
+        }
     }
 
+    @FXML
+    public void filter() {
+        reset.setVisible(true);
+        reset.setDisable(false);
+
+    }
+
+    private void applyBindings() {
+        searchField.textProperty().bindBidirectional(searchModel.searchTextProperty());
+        search.disableProperty().bind(searchModel.notEmptyToVisibilityBinding());
+    }
 }

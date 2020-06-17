@@ -5,6 +5,7 @@ import main.Models.Picture;
 import main.PresentationModels.Photographer_PM;
 import main.PresentationModels.Picture_PM;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -24,4 +25,5 @@ public interface DAL {
     void updateIptc(int iptcID, String value) throws Exception;
     void assignTagsToPic(int ID,List<String> tagList) throws Exception;
     boolean assignPhotographer(int picID, String firstName, String lastName) throws Exception;
+    HashMap<String,Integer> getTagMap() throws Exception;
 }

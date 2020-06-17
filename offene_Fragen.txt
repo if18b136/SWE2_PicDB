@@ -1,5 +1,4 @@
 //TODO 05: Logger use instead of sout - 1
-//TODO 07: report for tag with photo list - 4
 //TODO 09: java code documentation - 0
 //TODO 10: 1 site documentation - 6
 //TODO 11: Picture search function - 8

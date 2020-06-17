@@ -19,7 +19,7 @@
             </Menu>
             <Menu mnemonicParsing="false" text="Reporting">
                 <MenuItem fx:id="generatePicReport" mnemonicParsing="false" text="Generate Picture Report" disable="true"/>
-                <MenuItem fx:id="generateTagReport" mnemonicParsing="false" text="Generate Tag Report" disable="true"/>
+                <MenuItem fx:id="generateTagReport" mnemonicParsing="false" text="Generate Tag Report" onAction="#generateTagReport"/>
             </Menu>
         </MenuBar>
         <MenuBar>
@@ -29,8 +29,9 @@
         </MenuBar>
     </HBox>
     <HBox>
-        <TextField promptText="Search..." HBox.hgrow="ALWAYS" />
-        <Button mnemonicParsing="false" text="Search" disable="true"/>
+        <TextField fx:id="searchField" promptText="Search..." HBox.hgrow="ALWAYS" />
+        <Button mnemonicParsing="false" text="Reset" disable="true" visible="false" fx:id="reset"/>
+        <Button mnemonicParsing="false" text="Search" disable="true" fx:id="search" onMouseClicked="#filter"/>
     </HBox>
     <SplitPane dividerPositions="0.75" orientation="VERTICAL">
         <SplitPane dividerPositions="0.5668896321070234">

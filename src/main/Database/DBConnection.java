@@ -328,4 +328,14 @@ public class DBConnection {
         assign.setInt(2,picID);
         assign.execute();
     }
+
+    public HashMap<String,Integer> getTagMap() throws SQLException {
+        PreparedStatement getTagMap = con.prepareStatement("SELECT tag,COUNT(*) as count FROM picdb.tag_picture JOIN picdb.tag ON(tag_picture.FK_TAG_ID=tag.ID) GROUP BY tag");
+        ResultSet result = getTagMap.executeQuery();
+        HashMap<String,Integer> tagMap = new HashMap<>();
+        while (result.next()) {
+            tagMap.put(result.getString(1),result.getInt(2));
+        }
+        return tagMap;
+    }
 }
