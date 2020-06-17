@@ -1,4 +1,3 @@
-//TODO 03: add PhotographerViewModel - 7
 //TODO 05: Logger use instead of sout - 1
 //TODO 07: report for tag with photo list - 4
 //TODO 09: java code documentation - 0
@@ -6,6 +5,7 @@
 //TODO 11: Picture search function - 8
 //TODO 14: Time documentation - 2
 //TODO 18: implement true DALException with own class
+//TODO 20: Prevent addPicture duplicates
 
 FXML muss immer wieder neu gesetzt werden - wieso nicht nur einmal und alle direkt darunter liegenden zeilen werden betroffen wie bei Overload?
 

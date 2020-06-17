@@ -162,19 +162,28 @@ public class DataAccessLayer implements DAL {
         }
     }
 
+    // get all tags from db that are associated to the picID
+    // for every missing DB entry assign(+create) new tag to pic
+    // for every entry missing in input tagList, delete tag assignment to pic
     @Override
-    public void assignPhotographer(int picID, String lastName) throws Exception {
+    public void assignTagsToPic(int ID,List<String> tagList) throws Exception {
         try{
             DBConnection con = DBConnection.getInstance();
-            // evaluate if there is already a photographer with the name
-            int photographerID = con.checkPhotographer(lastName);   //returns either the ID or 0 for no entry found
-            if(photographerID == 0) {   // name does not exist, create new photographer
-                photographerID = con.addNewPhotographer(lastName); // return new ID
+            List<String> dbTagList = con.getAllTags(ID);
+            dbTagList.removeAll(tagList);
+            for(String dbTag : dbTagList) {
+                con.deleteTagPicAssignment(ID,dbTag);
             }
-            con.newPicPhotographer(picID,photographerID);
-        } catch(SQLException sql) {
-            DALLogger.error(sql.getMessage());
-            throw new Exception("DALException at DAL.assignPhotographer: " + sql.getMessage());
+            dbTagList = con.getAllTags(ID);
+            tagList.removeAll(dbTagList);
+            for( String tag : tagList) {
+                if(con.checkTag(tag) == 0) {
+                    con.addTag(tag);
+                }
+                con.assignTagToPic(ID, con.checkTag(tag));
+            }
+        } catch (SQLException sql) {
+            throw new Exception("DALException at DAL.assignTagsToPic: " + sql.getMessage());
         }
     }
 
@@ -190,7 +199,6 @@ public class DataAccessLayer implements DAL {
             }
             return false;
         } catch(SQLException sql) {
-            DALLogger.error(sql.getMessage());
             throw new Exception("DALException at DAL.assignPhotographer: " + sql.getMessage());
         }
     }

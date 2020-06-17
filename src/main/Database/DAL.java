@@ -22,6 +22,6 @@ public interface DAL {
     Picture_PM createPictureModel(int id, String name) throws Exception;
     void addIptc(int picID, String type, String value) throws Exception;
     void updateIptc(int iptcID, String value) throws Exception;
-    void assignPhotographer(int picID, String lastName) throws Exception;
+    void assignTagsToPic(int ID,List<String> tagList) throws Exception;
     boolean assignPhotographer(int picID, String firstName, String lastName) throws Exception;
 }

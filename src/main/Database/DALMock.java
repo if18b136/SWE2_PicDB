@@ -111,7 +111,9 @@ public class DALMock implements DAL{
     public void updateIptc(int iptcID, String value) { }
 
     @Override
-    public void assignPhotographer(int picID, String lastName) { }
+    public void assignTagsToPic(int ID, List<String> tagList) throws Exception {
+
+    }
 
     @Override
     public boolean assignPhotographer(int picID, String firstName, String lastName) {

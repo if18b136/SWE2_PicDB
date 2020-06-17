@@ -1,15 +1,10 @@
 package main.Service;
 
-import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.BadPdfFormatException;
-
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import main.Models.EXIF;
-import main.Models.Picture;
 import main.PresentationModels.EXIF_PM;
 import main.PresentationModels.Picture_PM;
 import org.apache.logging.log4j.LogManager;
@@ -99,7 +94,7 @@ public class PictureReport extends Reporting{
             table.addCell("Copyright");
             table.addCell(picturePm.getIptc().getCopyright());
             table.addCell("Tags");
-            table.addCell(picturePm.getIptc().getTagList());
+            table.addCell(picturePm.getIptc().getTagListString());
             getPdf().add(table);
         } catch (DocumentException ex) {
             repLogger.error(ex.getMessage());

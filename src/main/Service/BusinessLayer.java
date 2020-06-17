@@ -208,11 +208,9 @@ public class BusinessLayer {
             } else {
                 dal.updateIptc(picPM.getIptc().getCopyrightID(),picPM.getIptc().getCopyright());
             }
-            if(picPM.getIptc().getTagListID() == -1) {
-                dal.addIptc(picPM.getID(),"Tags",picPM.getIptc().getTagList());
-            } else {
-                dal.updateIptc(picPM.getIptc().getTagListID(),picPM.getIptc().getTagList());
-            }
+//            TagListID is not needed anymore because we create the list from single values from tag table in database
+            dal.assignTagsToPic(picPM.getID(),picPM.getIptc().getTagList());
+
         } catch (Exception e) {
             BLLogger.error(e.getMessage());
         }

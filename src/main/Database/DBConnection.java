@@ -176,38 +176,6 @@ public class DBConnection {
         delete.execute();
     }
 
-    // this currently gives the newest entry - not suitable for anything else than getting the just created personID.
-    public int addNewPhotographer(String lastName) throws SQLException {
-        PreparedStatement addPerson = con.prepareStatement("insert into picdb.person(NACHNAME) values(?)");
-        addPerson.setString(1,lastName);
-        addPerson.execute();
-        addPerson = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
-        addPerson.setString(1,lastName);
-        ResultSet result = addPerson.executeQuery();
-        int id = 0;
-        while (result.next()) {
-            id = result.getInt(1);
-        }
-        return id;
-    }
-
-    // this currently gives the newest entry - not suitable for anything else than getting the just created personID.
-    public int addNewPhotographer(String firstName, String lastName) throws SQLException {
-        PreparedStatement addPerson = con.prepareStatement("insert into picdb.person(VORNAME,NACHNAME) values(?,?)");
-        addPerson.setString(1,firstName);
-        addPerson.setString(2,lastName);
-        addPerson.execute();
-        addPerson = con.prepareStatement("select ID from picdb.person where VORNAME=? and NACHNAME=?");
-        addPerson.setString(1,firstName);
-        addPerson.setString(2,lastName);
-        ResultSet result = addPerson.executeQuery();
-        int id = 0;
-        while (result.next()) {
-            id = result.getInt(1);
-        }
-        return id;
-    }
-
     public void newPicPhotographer(int picID, int personID) throws SQLException {
         PreparedStatement assignment = con.prepareStatement("select count(*) from picdb.picture_person where FK_PICTURE_ID=?");//only one assignment per picture allowed
         assignment.setInt(1,picID);
@@ -227,14 +195,6 @@ public class DBConnection {
         }
     }
 
-    //TODO person needs uniqueness or else simply checking for lastname is not enough to get a single output eventually
-    public int checkPhotographer(String lastName) throws SQLException {
-        PreparedStatement getPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=?");
-        getPhotographer.setString(1,lastName);
-        ResultSet result = getPhotographer.executeQuery();
-        return result.next() ? result.getInt(1) : 0 ;
-    }
-
     public int checkPhotographer(String firstName, String lastName) throws SQLException {
         PreparedStatement getPhotographer = con.prepareStatement("select ID from picdb.person where NACHNAME=? and VORNAME=?");
         getPhotographer.setString(1,lastName);
@@ -244,9 +204,9 @@ public class DBConnection {
     }
 
     //TODO extract EXIF and IPTC retrieve to own functions
-    public Picture createPicModel(Integer id, String name) throws SQLException {
+    public Picture createPicModel(Integer ID, String name) throws SQLException {
         Picture pic = new Picture();
-        pic.setID(id);
+        pic.setID(ID);
         pic.setName(name);
 
         PreparedStatement getEXIF = con.prepareStatement("select ID,NAME,DESCRIPTION from picdb.metadata where FK_MD_PICTURE_ID=(select id from picture where name=?) and TYPE='EXIF'");
@@ -264,29 +224,34 @@ public class DBConnection {
         result = getIPTC.executeQuery();
         IPTC iptc = new IPTC();
         while (result.next()) {
-            String input = result.getString(2);
-            switch(input) {
-                case "Copyright":
-                    iptc.setCopyrightID(result.getInt(1));
-                    iptc.setCopyright(result.getString(3));
-                    break;
+//            String input = result.getString(2);
+//            switch(input) {
+//                case "Copyright":
+            iptc.setCopyrightID(result.getInt(1));
+            iptc.setCopyright(result.getString(3));
+//                    break;
+//      Taken out and replaced with proper photographer model
 //                case "Photographer":
 //                    iptc.setPhotographerID(result.getInt(1));
 //                    iptc.setPhotographer(result.getString(3));
 //                    break;
-                case "Tags":
-                    iptc.setTagListID(result.getInt(1));
-                    iptc.setTagList(result.getString(3));
-                    break;
-                default:
-                    DBConLogger.warn("Warning at DBConnection.createPicModel: Non-Standard EXIF Type found.");
-            }
+
+//      Replaced with new Database model that makes accessing and querying tags more easy
+//                case "Tags":
+//                    iptc.setTagListID(result.getInt(1));
+//                    iptc.setTagList(result.getString(3));
+//                    break;
+//                default:
+//                    DBConLogger.warn("Warning at DBConnection.createPicModel: Non-Standard EXIF Type found.");
+//            }
         }
+        // Join tag and tag_picture table and get all tag names that are associated with the pic ID
+        iptc.setTagList(getAllTags(ID));
         pic.setIPTC(iptc);
 
         Photographer photographer = new Photographer();
         PreparedStatement getPhotographer = con.prepareStatement("select FK_PERSON_ID from picdb.picture_person where FK_PICTURE_ID=?");
-        getPhotographer.setInt(1,id);
+        getPhotographer.setInt(1,ID);
         result = getPhotographer.executeQuery();
         if(result.next()) {
             int photographerID = result.getInt(1);
@@ -323,4 +288,44 @@ public class DBConnection {
         DBConLogger.info("IPTC entry updated.");
     }
 
+    public List<String> getAllTags(int ID) throws SQLException {
+        PreparedStatement getTags = con.prepareStatement("select tag.tag from tag_picture JOIN tag on(tag.ID=tag_picture.FK_TAG_ID) where tag_picture.FK_TAG_PIC_ID=?");
+        getTags.setInt(1,ID);
+        ResultSet result = getTags.executeQuery();
+        List<String> tagList = new ArrayList<>();
+        while (result.next()) {
+            tagList.add(result.getString(1));
+        }
+        return tagList;
+    }
+
+    public void deleteTagPicAssignment(int picID, String tag) throws SQLException {
+         PreparedStatement delTagPic = con.prepareStatement("delete from picdb.tag_picture where FK_TAG_ID=(SELECT ID from tag where TAG=?) and FK_TAG_PIC_ID=?");
+         delTagPic.setString(1,tag);
+         delTagPic.setInt(2,picID);
+         delTagPic.execute();
+    }
+
+    public int checkTag(String tag) throws SQLException {
+        PreparedStatement checkTag = con.prepareStatement("select ID from picdb.tag where TAG=?");
+        checkTag.setString(1,tag);
+        ResultSet result = checkTag.executeQuery();
+        if (result.next()) {
+            return result.getInt(1);
+        }
+        return 0;
+    }
+
+    public void addTag(String tag) throws SQLException {
+        PreparedStatement addTag = con.prepareStatement("insert into picdb.tag(TAG) values(?)");
+        addTag.setString(1,tag);
+        addTag.execute();
+    }
+
+    public void assignTagToPic(int picID, int tagID) throws SQLException {
+        PreparedStatement assign = con.prepareStatement("insert into picdb.tag_picture(FK_TAG_ID,FK_TAG_PIC_ID) values(?,?)");
+        assign.setInt(1,tagID);
+        assign.setInt(2,picID);
+        assign.execute();
+    }
 }
