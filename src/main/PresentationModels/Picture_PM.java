@@ -34,7 +34,7 @@ public class Picture_PM {
     public List<EXIF_PM> getExifList() {
         return exifList.get();
     }
-    public Photographer getPhotographer() { return photographer.get(); }
+    public Photographer getPhotographer() { return photographer.get() == null ? new Photographer() : photographer.get(); }
     public void setPhotographer(Photographer photographer) { this.photographer.set(photographer); }
 
     // due to me not wanting to make a fixed variation of exifs, I need to convert the exif list into a Presentation model list

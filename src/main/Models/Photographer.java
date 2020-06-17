@@ -6,7 +6,7 @@ public class Photographer implements PhotographerModel{
     private int ID = -1;
     private String firstName = "";
     private String lastName = "";
-    private LocalDate birthday = null;
+    private LocalDate birthday = LocalDate.of(1,1,1);
     private String notes = "";
 
     @Override

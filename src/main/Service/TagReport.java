@@ -81,7 +81,7 @@ public class TagReport extends Reporting {
         g2d.dispose();
 
         // zum PDF Hinzufügen
-        content.addTemplate(template, 100, 300);
+        content.addTemplate(template, 100, 100);
 
     }
 
