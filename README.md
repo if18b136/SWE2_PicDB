@@ -59,4 +59,6 @@ Weiters habe ich die Datenbank über die Grundanforderungen heraus erweitert, um
 ## Was würde ich nächstes mal anders machen
 
 Von anfang an das Projekt mit einem Build-System initialisieren. Mitten im Projekt war das leider nicht mehr organisch realisierbar. <br>
-Mit den Modelelementen anfangen, da ich bei der Implementierung schnell mit dem JavaFX Binding verzweifelt bin, da ich es im Nachhinein einfügen wollte, was leider bis zuletzt nur in einer Instanz der Suchleiste funktioniert hat.
+Mit den Modelelementen anfangen, da ich bei der Implementierung schnell mit dem JavaFX Binding verzweifelt bin, da ich es im Nachhinein einfügen wollte, was leider bis zuletzt nur in einer Instanz der Suchleiste funktioniert hat. <br>
+
+Und wenn möglich nicht mehr mit JavaFX arbeiten - katastrophale Performance und regelmäßige Abstürze haben mich viel Zeit gekostet.
