@@ -13,6 +13,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This class is the main access to the MySql database that manages all data.
+ * It is only accessed by the Data Access Layer and only calls it's configuration data from the config class.
+ * Other than that it is completely isolated.
+ */
 public class DBConnection {
     final static Logger DBConLogger = LogManager.getLogger("Database Connection");
     private static DBConnection jdbc;
@@ -21,7 +26,14 @@ public class DBConnection {
     private String username = "";
     private String password = "";
 
-    //Static Singleton initialisation
+
+
+    /**
+     * Static Singleton initialisation.
+     * The DBConnection is a Singleton that does not need to be initialized again for every call.
+     * In the Constructor it also calls the Config class to receive it's database configuration data.
+     * @throws SQLException SqlException
+     */
     private DBConnection() throws SQLException{
         try{
             Class.forName(Config.getInstance().getProperties().getProperty("driver"));
@@ -33,13 +45,21 @@ public class DBConnection {
         }
     }
 
+    /**
+     * Function to call the connection.
+     * @return the active Database Connection object
+     */
     public Connection getConnection(){
         return this.con;
     }
 
-    // Synchronizing the whole class creates huge thread overhead,
-    // because only one thread can access the getInstance at a time
-    // By making a second instance check, which we synchronize, we minimize that overhead
+    /**
+     * Synchronizing the whole class creates huge thread overhead,
+     * because only one thread can access the getInstance at a time
+     * By making a second instance check, which we synchronize, we minimize that overhead
+     * @return  the database connection singleton object
+     * @throws SQLException if something went wrong with the connection establishing
+     */
     public static DBConnection getInstance() throws SQLException{
         if(jdbc == null){
             synchronized (DBConnection.class){
@@ -55,6 +75,13 @@ public class DBConnection {
         return jdbc;
     }
 
+    /**
+     * Database call to get a picture ID for a certain picture name.
+     * This function does not handle identical picture names, it just calls the newest entry.
+     * @param name      Picture name
+     * @return          Picture ID as integer
+     * @throws SQLException if something went wrong with the connection
+     */
     public int getPicID(String name) throws SQLException {
         PreparedStatement getID = con.prepareStatement("select ID from picdb.picture where name=?");
         getID.setString(1,name);
@@ -67,6 +94,17 @@ public class DBConnection {
         return picNameID;
     }
 
+    /**
+     * Add a new picture to the database.
+     * The picture shooting date is commented out because of conversion problems between the metadata extraction framework date format and the sql date format.
+     * First the picture name is inserted into the picture table
+     * Then each extracted EXIF info is added into the metadata table
+     * @param name      Picture name
+     * @param expTime   EXIF info - Exposure Time
+     * @param maker     EXIF info - Camera maker
+     * @param model     EXIF info - Camera model
+     * @throws SQLException if something went wrong with the connection
+     */
     public void uploadPic(String name/*, Date date*/, String expTime, String maker, String model) throws SQLException {
         PreparedStatement insertPic = con.prepareStatement("insert into picdb.picture(name) values(?)");
         insertPic.setString(1,name);

@@ -5,14 +5,16 @@ import main.Models.Picture;
 import main.PresentationModels.Photographer_PM;
 import main.PresentationModels.Picture_PM;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * The Data Access Layer Interface.
+ * Function descriptions can be found in it's subclass DataAccessLayer.
+ */
 public interface DAL {
     void initialize();
-    //List<Photographer> getPhotographers(); TODO add photographer class in Models
     Picture getPicture(String name) throws Exception;
     List<Photographer_PM> retrievePhotographers() throws Exception;
     Photographer addNewPhotographer(String firstName, String lastName, LocalDate birthday, String notes) throws Exception;

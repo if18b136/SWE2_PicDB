@@ -7,12 +7,14 @@ import main.Models.Picture;
 import main.PresentationModels.Photographer_PM;
 import main.PresentationModels.Picture_PM;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Mock Database Access Layer for UnitTesting
+ */
 public class DALMock implements DAL{
     @Override
     public void initialize() {}

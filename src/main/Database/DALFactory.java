@@ -1,5 +1,8 @@
 package main.Database;
 
+/**
+ * Factory Helper class to create Database Mocks for UnitTests
+ */
 public class DALFactory {
     private static boolean useMock = false;
 
